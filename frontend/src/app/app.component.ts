@@ -1,12 +1,17 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  template: `<h1>{{ message }}</h1>`,
 })
-export class AppComponent {
-  title = 'frontend';
+export class AppComponent implements OnInit {
+  message = '...loading';
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.http.get('http://localhost:8080/api/hello', { responseType: 'text' })
+      .subscribe(text => this.message = text, err => this.message = 'Error: ' + err.message);
+  }
 }

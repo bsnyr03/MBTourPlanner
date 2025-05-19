@@ -1,0 +1,38 @@
+package at.fhtw.mbtourplanner.service;
+
+import at.fhtw.mbtourplanner.model.Tour;
+import at.fhtw.mbtourplanner.repository.TourEntity;
+import org.apache.catalina.mapper.Mapper;
+import org.springframework.stereotype.Component;
+
+@Component
+public class TourMapper extends AbstractMapper<TourEntity, Tour> {
+
+    @Override
+    public Tour toDto(TourEntity entity) {
+        return Tour.builder()
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .fromLocation(entity.getFromLocation())
+                .toLocation(entity.getToLocation())
+                .transportType(entity.getTransportType())
+                .distance(entity.getDistance())
+                .estimatedTime(entity.getEstimatedTime())
+                .routeImageUrl(entity.getRouteImageUrl())
+                .build();
+    }
+
+    @Override
+    public TourEntity toEntity(Tour dto) {
+        return TourEntity.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .fromLocation(dto.getFromLocation())
+                .toLocation(dto.getToLocation())
+                .transportType(dto.getTransportType())
+                .distance(dto.getDistance())
+                .estimatedTime(dto.getEstimatedTime())
+                .routeImageUrl(dto.getRouteImageUrl())
+                .build();
+    }
+}
