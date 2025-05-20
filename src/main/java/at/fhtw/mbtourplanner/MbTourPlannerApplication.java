@@ -24,7 +24,7 @@ public class MbTourPlannerApplication {
 	void initDB() {
 	    tourRepository.save(
 	        TourEntity.builder()
-	            .name("City Highlights")
+	            .name("Kadikoy Tour")
 	            .description("A guided bike tour through the historic city center.")
 	            .fromLocation("Old Town")
 	            .toLocation("City Park")
@@ -36,7 +36,7 @@ public class MbTourPlannerApplication {
 	    );
 	    tourRepository.save(
 	        TourEntity.builder()
-	            .name("Mountain Hike")
+	            .name("Barcelona City Tour")
 	            .description("A challenging hike up the local mountain trail.")
 	            .fromLocation("Trailhead")
 	            .toLocation("Summit")
@@ -48,10 +48,10 @@ public class MbTourPlannerApplication {
 	    );
 	    tourRepository.save(
 	        TourEntity.builder()
-	            .name("Beach Vacation")
-	            .description("A relaxing walk along the coastal boardwalk.")
-	            .fromLocation("Pier")
-	            .toLocation("Lighthouse")
+	            .name("Istanbul City Tour")
+	            .description("A relaxing walk along the beach promenade.")
+	            .fromLocation("Beach Entrance")
+	            .toLocation("Beach Cafe")
 	            .transportType("walk")
 	            .distance(5.0)
 	            .estimatedTime(Duration.ofHours(2))
