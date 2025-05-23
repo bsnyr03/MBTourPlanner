@@ -37,5 +37,9 @@ public class TourController {
         return tourService.updateTour(id, tour);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteTour(@PathVariable Long id) throws SQLException {
+        tourService.deleteTour(id);
+    }
 
 }

@@ -43,6 +43,11 @@ public class TourService {
         return tourMapper.toDto(tourRepository.save(existingTour));
     }
 
+    public void deleteTour(Long id) throws SQLException {
+        TourEntity tourEntity = tourRepository.findById(id).orElseThrow(() -> new RuntimeException("Tour not found"));
+        tourRepository.delete(tourEntity);
+    }
+
 
 
 
