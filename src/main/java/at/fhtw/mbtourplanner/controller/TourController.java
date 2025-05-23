@@ -31,4 +31,11 @@ public class TourController {
     public Tour getTourById(@PathVariable Long id) throws SQLException {
         return tourService.getTourById(id);
     }
+
+    @PutMapping("/{id}")
+    public Tour updateTour(@PathVariable Long id, @RequestBody Tour tour) throws SQLException {
+        return tourService.updateTour(id, tour);
+    }
+
+
 }

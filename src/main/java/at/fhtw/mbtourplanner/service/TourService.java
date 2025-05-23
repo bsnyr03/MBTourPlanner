@@ -30,6 +30,21 @@ public class TourService {
         return tourMapper.toDto(tourEntity);
     }
 
+    public Tour updateTour(Long id, Tour tour) throws SQLException {
+        TourEntity existingTour = tourRepository.findById(id).orElseThrow(() -> new RuntimeException("Tour not found"));
+        existingTour.setName(tour.getName());
+        existingTour.setDescription(tour.getDescription());
+        existingTour.setFromLocation(tour.getFromLocation());
+        existingTour.setToLocation(tour.getToLocation());
+        existingTour.setTransportType(tour.getTransportType());
+        existingTour.setDistance(tour.getDistance());
+        existingTour.setEstimatedTime(tour.getEstimatedTime());
+        existingTour.setRouteImageUrl(tour.getRouteImageUrl());
+        return tourMapper.toDto(tourRepository.save(existingTour));
+    }
+
+
+
 
 
 }
