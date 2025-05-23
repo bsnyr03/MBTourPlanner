@@ -1,7 +1,6 @@
 package at.fhtw.mbtourplanner.model;
 import lombok.*;
-
-import java.time.Duration;
+import org.postgresql.util.PGInterval;
 
 @Data
 @Builder
@@ -13,6 +12,6 @@ public class Tour {
     private String toLocation;
     private String transportType;
     private double distance;
-    private Duration estimatedTime;
+    private PGInterval estimatedTime;
     private String routeImageUrl;
 }

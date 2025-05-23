@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import at.fhtw.mbtourplanner.repository.TourRepository;
-import java.time.Duration;
+import org.postgresql.util.PGInterval;
+
+import java.sql.SQLException;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -21,7 +23,7 @@ public class MbTourPlannerApplication {
 	}
 
 	@PostConstruct
-	void initDB() {
+	void initDB() throws SQLException {
 	    tourRepository.save(
 	        TourEntity.builder()
 	            .name("Kadikoy Tour")
@@ -30,7 +32,7 @@ public class MbTourPlannerApplication {
 	            .toLocation("City Park")
 	            .transportType("bike")
 	            .distance(12.5)
-	            .estimatedTime(Duration.ofHours(1).plusMinutes(30))
+	            .estimatedTime(new PGInterval("3 hours 30 minutes"))
 	            .routeImageUrl("https://example.com/city-tour.png")
 	            .build()
 	    );
@@ -42,7 +44,7 @@ public class MbTourPlannerApplication {
 	            .toLocation("Summit")
 	            .transportType("hike")
 	            .distance(8.0)
-	            .estimatedTime(Duration.ofHours(4))
+	            .estimatedTime(new PGInterval("1 hour 30 minutes"))
 	            .routeImageUrl("https://example.com/mountain-hike.png")
 	            .build()
 	    );
@@ -54,7 +56,7 @@ public class MbTourPlannerApplication {
 	            .toLocation("Beach Cafe")
 	            .transportType("walk")
 	            .distance(5.0)
-	            .estimatedTime(Duration.ofHours(2))
+	            .estimatedTime(new PGInterval("2 hours"))
 	            .routeImageUrl("https://example.com/beach-vacation.png")
 	            .build()
 	    );

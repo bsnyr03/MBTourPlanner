@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -22,7 +23,7 @@ public class TourController {
     }
 
     @PostMapping
-    public void addTour(@RequestBody Tour tour) {
+    public void addTour(@RequestBody Tour tour) throws SQLException {
         tourService.addTour(tour);
     }
 }

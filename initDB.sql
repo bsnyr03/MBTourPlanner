@@ -1,4 +1,7 @@
 -- init.sql
+
+DROP TABLE IF EXISTS tours CASCADE;
+
 CREATE TABLE IF NOT EXISTS tours
 (
     id
@@ -25,7 +28,7 @@ CREATE TABLE IF NOT EXISTS tours
     DOUBLE
     PRECISION,
     estimated_time
-    BIGINT,
+    INTERVAL,
     route_image_url
     TEXT
 );
@@ -38,7 +41,7 @@ VALUES ('City Highlights',
         'City Park',
         'bike',
         12.5,
-        5400,
+        '2 hours',
         'https://example.com/city-tour.png'),
        ('Mountain Hike',
         'A challenging hike up the local mountain trail.',
@@ -46,7 +49,7 @@ VALUES ('City Highlights',
         'Summit',
         'hike',
         8.0,
-        14400,
+        '4 hours',
         'https://example.com/mountain-hike.png'),
        ('Beach Vacation',
         'A relaxing walk along the coastal boardwalk.',
@@ -54,5 +57,5 @@ VALUES ('City Highlights',
         'Lighthouse',
         'walk',
         5.0,
-        7200,
+        '2 hours',
         'https://example.com/beach-vacation.png');
