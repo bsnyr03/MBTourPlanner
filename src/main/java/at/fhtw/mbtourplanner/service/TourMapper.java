@@ -2,8 +2,6 @@ package at.fhtw.mbtourplanner.service;
 
 import at.fhtw.mbtourplanner.model.Tour;
 import at.fhtw.mbtourplanner.repository.TourEntity;
-import org.apache.catalina.mapper.Mapper;
-import org.postgresql.util.PGInterval;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
@@ -20,7 +18,7 @@ public class TourMapper extends AbstractMapper<TourEntity, Tour> {
                 .toLocation(entity.getToLocation())
                 .transportType(entity.getTransportType())
                 .distance(entity.getDistance())
-                .estimatedTime(entity.getEstimatedTime() != null ? new PGInterval(entity.getEstimatedTime().toString()) : null)
+                .estimatedTime(entity.getEstimatedTime())
                 .routeImageUrl(entity.getRouteImageUrl())
                 .build();
     }
@@ -34,7 +32,7 @@ public class TourMapper extends AbstractMapper<TourEntity, Tour> {
                 .toLocation(dto.getToLocation())
                 .transportType(dto.getTransportType())
                 .distance(dto.getDistance())
-                .estimatedTime(dto.getEstimatedTime() != null ? new PGInterval(dto.getEstimatedTime().toString()) : null)
+                .estimatedTime(dto.getEstimatedTime())
                 .routeImageUrl(dto.getRouteImageUrl())
                 .build();
     }

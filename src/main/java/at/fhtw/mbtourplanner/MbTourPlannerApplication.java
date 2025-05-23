@@ -32,7 +32,7 @@ public class MbTourPlannerApplication {
 	            .toLocation("City Park")
 	            .transportType("bike")
 	            .distance(12.5)
-	            .estimatedTime(new PGInterval("3 hours 30 minutes"))
+	            .estimatedTime("1:30:00")
 	            .routeImageUrl("https://example.com/city-tour.png")
 	            .build()
 	    );
@@ -44,7 +44,7 @@ public class MbTourPlannerApplication {
 	            .toLocation("Summit")
 	            .transportType("hike")
 	            .distance(8.0)
-	            .estimatedTime(new PGInterval("1 hour 30 minutes"))
+	            .estimatedTime("3:00:00")
 	            .routeImageUrl("https://example.com/mountain-hike.png")
 	            .build()
 	    );
@@ -56,7 +56,7 @@ public class MbTourPlannerApplication {
 	            .toLocation("Beach Cafe")
 	            .transportType("walk")
 	            .distance(5.0)
-	            .estimatedTime(new PGInterval("2 hours"))
+	            .estimatedTime("1:00:00")
 	            .routeImageUrl("https://example.com/beach-vacation.png")
 	            .build()
 	    );

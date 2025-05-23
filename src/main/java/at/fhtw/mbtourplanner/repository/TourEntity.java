@@ -1,9 +1,6 @@
 package at.fhtw.mbtourplanner.repository;
 import jakarta.persistence.*;
 import lombok.*;
-import org.postgresql.util.PGInterval;
-
-import java.time.Duration;
 
 @Entity
 @AllArgsConstructor
@@ -33,8 +30,8 @@ public class TourEntity {
 
     private double distance;
 
-    @Column(name = "estimated_time", columnDefinition = "interval")
-    private PGInterval estimatedTime;
+    @Column(name = "estimated_time")
+    private String estimatedTime;
 
     private String routeImageUrl;
 }
