@@ -26,4 +26,9 @@ public class TourController {
     public void addTour(@RequestBody Tour tour) throws SQLException {
         tourService.addTour(tour);
     }
+
+    @GetMapping("/{id}")
+    public Tour getTourById(@PathVariable Long id) throws SQLException {
+        return tourService.getTourById(id);
+    }
 }

@@ -1,6 +1,7 @@
 package at.fhtw.mbtourplanner.service;
 
 import at.fhtw.mbtourplanner.model.Tour;
+import at.fhtw.mbtourplanner.repository.TourEntity;
 import at.fhtw.mbtourplanner.repository.TourRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,5 +24,12 @@ public class TourService {
     public void addTour(Tour tour) throws SQLException {
         tourRepository.save(tourMapper.toEntity(tour));
     }
+
+    public Tour getTourById(Long id) throws SQLException {
+        TourEntity tourEntity = tourRepository.findById(id).orElseThrow(() -> new RuntimeException("Tour not found"));
+        return tourMapper.toDto(tourEntity);
+    }
+
+
 
 }
