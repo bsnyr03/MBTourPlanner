@@ -1,6 +1,7 @@
 -- init.sql
 
 DROP TABLE IF EXISTS tours CASCADE;
+DROP TABLE IF EXISTS tour_logs CASCADE;
 
 CREATE TABLE IF NOT EXISTS tours
 (
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS tours
     route_image_url
     TEXT
 );
+
 
 INSERT INTO tours (name, description, from_location, to_location, transport_type, distance, estimated_time,
                    route_image_url)

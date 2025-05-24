@@ -3,7 +3,6 @@ import lombok.*;
 
 @Data
 @Builder
-
 public class Tour {
     private String name;
     private String description;
