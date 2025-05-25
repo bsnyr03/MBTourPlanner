@@ -1,6 +1,8 @@
 package at.fhtw.mbtourplanner;
 
 import at.fhtw.mbtourplanner.repository.TourEntity;
+import at.fhtw.mbtourplanner.repository.TourLogEntity;
+import at.fhtw.mbtourplanner.repository.TourLogRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +12,15 @@ import at.fhtw.mbtourplanner.repository.TourRepository;
 import org.postgresql.util.PGInterval;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 @SpringBootApplication
 @RequiredArgsConstructor
 public class MbTourPlannerApplication {
 
 	@Autowired
-	private TourRepository tourRepository;
+	private final TourRepository tourRepository;
+	private final TourLogRepository tourLogRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(MbTourPlannerApplication.class, args);
@@ -60,6 +64,42 @@ public class MbTourPlannerApplication {
 	            .routeImageUrl("https://example.com/beach-vacation.png")
 	            .build()
 	    );
+		tourLogRepository.save(
+				TourLogEntity.builder()
+					.tour(tourRepository.findById(1L).orElse(null))
+					.logDateTime(LocalDateTime.now())
+					.comment("Great tour, enjoyed the sights!")
+					.difficulty(3)
+					.totalDistance(12.5)
+					.totalTime("1:30:00")
+					.rating("5 stars")
+					.build()
+		);
+
+		tourLogRepository.save(
+				TourLogEntity.builder()
+					.tour(tourRepository.findById(2L).orElse(null))
+					.logDateTime(LocalDateTime.now())
+					.comment("Challenging but rewarding hike!")
+					.difficulty(4)
+					.totalDistance(8.0)
+					.totalTime("3:00:00")
+					.rating("4 stars")
+					.build()
+		);
+
+		tourLogRepository.save(
+				TourLogEntity.builder()
+					.tour(tourRepository.findById(3L).orElse(null))
+					.logDateTime(LocalDateTime.now())
+					.comment("Relaxing walk, perfect for a sunny day.")
+					.difficulty(2)
+					.totalDistance(5.0)
+					.totalTime("1:00:00")
+					.rating("5 stars")
+					.build()
+		);
+
 	}
 
 }

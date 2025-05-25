@@ -1,5 +1,3 @@
--- init.sql
-
 DROP TABLE IF EXISTS tours CASCADE;
 DROP TABLE IF EXISTS tour_logs CASCADE;
 
@@ -34,30 +32,85 @@ CREATE TABLE IF NOT EXISTS tours
     TEXT
 );
 
+CREATE TABLE IF NOT EXISTS tour_logs
+(
+    id
+    SERIAL
+    PRIMARY
+    KEY,
+    tour_id
+    INTEGER
+    NOT
+    NULL,
+    log_datetime
+    TIMESTAMP
+    NOT
+    NULL,
+    comment
+    TEXT,
+    difficulty
+    INTEGER
+    NOT
+    NULL,
+    total_distance
+    DOUBLE
+    PRECISION
+    NOT
+    NULL,
+    total_time
+    TEXT
+    NOT
+    NULL,
+    rating
+    INTEGER
+    NOT
+    NULL,
+)
+    INSERT INTO tours
+(
+    name,
+    description,
+    from_location,
+    to_location,
+    transport_type,
+    distance,
+    estimated_time,
+    route_image_url
+)
+    VALUES
+(
+    'City Highlights',
+    'A guided bike tour through the historic city center.',
+    'Old Town',
+    'City Park',
+    'bike',
+    12.5,
+    '2 hours',
+    'https://example.com/city-tour.png'
+),
+(
+    'Mountain Hike',
+    'A challenging hike up the local mountain trail.',
+    'Trailhead',
+    'Summit',
+    'hike',
+    8.0,
+    '4 hours',
+    'https://example.com/mountain-hike.png'
+),
+(
+    'Beach Vacation',
+    'A relaxing walk along the coastal boardwalk.',
+    'Pier',
+    'Lighthouse',
+    'walk',
+    5.0,
+    '2 hours',
+    'https://example.com/beach-vacation.png'
+);
 
-INSERT INTO tours (name, description, from_location, to_location, transport_type, distance, estimated_time,
-                   route_image_url)
-VALUES ('City Highlights',
-        'A guided bike tour through the historic city center.',
-        'Old Town',
-        'City Park',
-        'bike',
-        12.5,
-        '2 hours',
-        'https://example.com/city-tour.png'),
-       ('Mountain Hike',
-        'A challenging hike up the local mountain trail.',
-        'Trailhead',
-        'Summit',
-        'hike',
-        8.0,
-        '4 hours',
-        'https://example.com/mountain-hike.png'),
-       ('Beach Vacation',
-        'A relaxing walk along the coastal boardwalk.',
-        'Pier',
-        'Lighthouse',
-        'walk',
-        5.0,
-        '2 hours',
-        'https://example.com/beach-vacation.png');
+
+INSERT INTO tour_logs (tour_id, log_datetime, comment, difficulty, total_distance, total_time, rating)
+VALUES (1, '2023-10-01 10:00:00', 'Great tour, very informative!', 2, 12.5, '2 hours', 5),
+       (2, '2023-10-02 09:30:00', 'Challenging but worth it for the views.', 4, 8.0, '4 hours', 4),
+       (3, '2023-10-03 11:00:00', 'Relaxing and beautiful scenery.', 1, 5.0, '2 hours', 5);
