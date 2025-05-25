@@ -28,6 +28,14 @@ public class TourLogController {
         return tourLogService.getLog(tourId, id);
     }
 
+    @PostMapping
+    public TourLog create(@PathVariable Long tourId, @RequestBody TourLog tourLog) throws SQLException {
+        return tourLogService.addLog(tourId, tourLog);
+    }
+
+
+
+
 
 
 }

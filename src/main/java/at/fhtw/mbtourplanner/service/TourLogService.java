@@ -37,11 +37,12 @@ public class TourLogService {
         return mapper.toDto(tourLogEntity);
     }
 
-    public void addLog(Long tourId, TourLog tourLog) throws SQLException {
+    public TourLog addLog(Long tourId, TourLog tourLog) throws SQLException {
         TourEntity tour = tourRepository.findById(tourId).orElseThrow(() -> new RuntimeException("Tour not found"));
         TourLogEntity tourLogEntity = mapper.toEntity(tourLog);
         tourLogEntity.setTour(tour);
         tourLogRepository.save(tourLogEntity);
+        return mapper.toDto(tourLogEntity);
     }
 
     public TourLog updateLog(Long tourId, Long logId, TourLog dto) throws SQLException {
