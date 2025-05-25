@@ -33,6 +33,11 @@ public class TourLogController {
         return tourLogService.addLog(tourId, tourLog);
     }
 
+    @PutMapping("/{logId}")
+    public TourLog update(@PathVariable Long tourId, @PathVariable("logId") Long id, @RequestBody TourLog tourLog) throws SQLException {
+        return tourLogService.updateLog(tourId, id, tourLog);
+    }
+
 
 
 
