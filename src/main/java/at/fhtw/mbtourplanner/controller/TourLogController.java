@@ -1,18 +1,28 @@
 package at.fhtw.mbtourplanner.controller;
 
+import at.fhtw.mbtourplanner.model.TourLog;
 import at.fhtw.mbtourplanner.service.TourLogService;
 import jakarta.persistence.NamedStoredProcedureQuery;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
+import java.util.List;
 
 @RestController
-@RequestMapping("api/tour_logs")
+@RequestMapping("api/tours/{tourId}/tour_logs")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
 public class TourLogController {
 
     private final TourLogService tourLogService;
+
+    @GetMapping
+    public List<TourLog> getAll(@PathVariable Long tourId) throws SQLException {
+        return tourLogService.getLogsForTour(tourId);
+    }
+
+
+
 
 }
