@@ -38,8 +38,10 @@ public class TourLogController {
         return tourLogService.updateLog(tourId, id, tourLog);
     }
 
-
-
+    @DeleteMapping("/{logId}")
+    public void delete(@PathVariable Long tourId, @PathVariable("logId") Long id) throws SQLException {
+        tourLogService.deleteLog(tourId, id);
+    }
 
 
 
