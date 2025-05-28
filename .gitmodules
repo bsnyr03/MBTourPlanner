@@ -1,0 +1,3 @@
+[submodule "external/frontend"]
+	path = external/frontend
+	url = git@github.com:bsnyr03/MBTourPlannerFrontend.git
