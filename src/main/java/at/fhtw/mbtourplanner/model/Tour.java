@@ -4,6 +4,8 @@ import lombok.*;
 @Data
 @Builder
 public class Tour {
+    private Long id;
+
     private String name;
     private String description;
     private String fromLocation;
