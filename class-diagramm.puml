@@ -1,0 +1,132 @@
+@startuml
+
+package controller {
+  class TourController {
+    @RequestMapping("api/tours")
+
+    +getAll(): List<Tour>
+    +getTourById(id: Long): Tour
+    +addTour(tour: Tour): Tour
+    +updateTour(id: Long, tour: Tour): Tour
+    +deleteTour(id: Long): void
+  }
+
+  class TourLogController {
+    @RequestMapping("api/tours/{tourId}/tour_logs")
+
+    +getAll(tourId: Long): List<TourLog>
+    +getOneLog(id: Long, tourId: Long): TourLog
+    +create(tourLog: TourLog, tourId: Long): TourLog
+    +updateTourLog(id: Long, tourId: Long, tourLog: TourLog): TourLog
+    +deleteTourLog(id: Long, tourId: Long): void
+  }
+
+  TourController ..> TourService
+  TourLogController ..> TourLogService
+
+ }
+
+package model {
+  class Tour {
+    +id: Long
+    +name: String
+    +description: String
+    +fromLocation: String
+    +toLocation: String
+    +transportType: String
+    +distance: Double
+    +estimatedTime: String
+    routeImageUrl: String
+  }
+
+  class TourLog {
+    +id: Long
+    +tour: TourEntity
+    +comment: String
+    +totalDistance: Double
+    +totalTime: String
+    +rating: String
+  }
+}
+
+package repository {
+  interface TourRepository {
+  ..extends JpaRespository<TourEntity, Long>
+  }
+
+  interface TourLogRepository {
+  ..extends JpaRepository<TourLogEntity, Long>
+  +findAllByTour(): List<TourEntity>
+  }
+
+  class TourEntity{
+    +id: Long
+    +name: String
+    +description: String
+    +fromLocation: String
+    +toLocation: String
+    +transportType: String
+    +distance: Double
+    +estimatedTime: String
+    routeImageUrl: String
+}
+
+  class TourLogEntity {
+    +id: Long
+    +tour: TourEntity
+    +LocalDateTime: logDatetime
+    +comment: String
+    +difficulty: Integer
+    +totalDistance: Double
+    +totalTime: String
+    +rating: String
+  }
+
+  TourEntity "1" -- "0..*" TourLogEntity : hasLogs
+}
+
+package service{
+    abstract class AbstractMapper{
+    +toDto(entity: E): D
+    +toEntity(dto: D): E
+    +toDto(entities: Collection<E>): List<D>
+    }
+
+    class TourMapper extends AbstractMapper<TourEntity, Tour> {
+        +toDto(entity: TourEntity): Tour
+        +toEntity(dto: Tour): TourEntity
+    }
+
+    class TourLogMapper extends AbstractMapper<TourLogEntity, TourLog> {
+        +toDto(entity: TourLogEntity): TourLog
+        +toEntity(dto: TourLog): TourLogEntity
+    }
+
+    AbstractMapper <|-- TourMapper
+    AbstractMapper <|-- TourLogMapper
+
+
+    class TourService {
+        +getAllTours(): List<Tour>
+        +getTourById(id: Long): Tour
+        +addTour(tour: Tour): Tour
+        +updateTour(id: Long, tour: Tour): Tour
+        +deleteTour(id: Long): void
+    }
+
+    class TourLogService {
+        +getLogsForTour(tourId: Long): List<TourLog>
+        +getLog(id: Long, tourId: Long): TourLog
+        +addLog(tourLog: TourLog, tourId: Long): TourLog
+        +updateLog(id: Long, tourId: Long, tourLog: TourLog): TourLog
+        +deleteLog(id: Long, tourId: Long): void
+    }
+
+    TourService ..> TourMapper
+    TourService ..> TourRepository
+
+    TourLogService ..> TourLogMapper
+    TourLogService ..> TourLogRepository
+}
+
+@enduml
