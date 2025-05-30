@@ -1,0 +1,59 @@
+@startuml
+
+actor User
+
+package "Tour Management" {
+  (Create Tour)
+  (View Tours)
+  (View Tour Details)
+  (Update Tour)
+  (Delete Tour)
+}
+
+package "TourLog Management" {
+  (Create TourLog)
+  (View TourLogs)
+  (Update TourLog)
+  (Delete TourLog)
+}
+
+package "Search & Analysis" {
+  (Search Tours & Logs)
+  (Compute Popularity)
+  (Compute ChildFriendliness)
+}
+
+package "Data Import/Export" {
+  (Import Tours)
+  (Export Tours)
+}
+
+package "Reporting" {
+  (Generate Tour Report)
+  (Generate Summary Report)
+}
+
+package "Unique Feature"{
+}
+
+User --> (Create Tour)
+User --> (View Tours)
+User --> (View Tour Details)
+User --> (Update Tour)
+User --> (Delete Tour)
+
+User --> (Create TourLog)
+User --> (View TourLogs)
+User --> (Update TourLog)
+User --> (Delete TourLog)
+
+User --> (Search Tours & Logs)
+User --> (Import Tours)
+User --> (Export Tours)
+
+User --> (Generate Tour Report)
+User --> (Generate Summary Report)
+
+User  --> (Unique Feature)
+
+@enduml
