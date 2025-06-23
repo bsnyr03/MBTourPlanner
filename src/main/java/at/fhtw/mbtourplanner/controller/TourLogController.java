@@ -2,8 +2,7 @@ package at.fhtw.mbtourplanner.controller;
 
 import at.fhtw.mbtourplanner.model.TourLog;
 import at.fhtw.mbtourplanner.service.TourLogService;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.NamedStoredProcedureQuery;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,12 +28,12 @@ public class TourLogController {
     }
 
     @PostMapping
-    public TourLog create(@PathVariable Long tourId, @RequestBody TourLog tourLog) throws SQLException {
+    public TourLog create(@PathVariable Long tourId, @Valid @RequestBody TourLog tourLog) throws SQLException {
         return tourLogService.addLog(tourId, tourLog);
     }
 
     @PutMapping("/{logId}")
-    public TourLog update(@PathVariable Long tourId, @PathVariable("logId") Long id, @RequestBody TourLog tourLog) throws SQLException {
+    public TourLog update(@PathVariable Long tourId, @Valid @PathVariable("logId") Long id, @RequestBody TourLog tourLog) throws SQLException {
         return tourLogService.updateLog(tourId, id, tourLog);
     }
 

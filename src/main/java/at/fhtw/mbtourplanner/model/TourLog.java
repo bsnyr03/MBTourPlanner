@@ -3,6 +3,8 @@ package at.fhtw.mbtourplanner.model;
 
 import at.fhtw.mbtourplanner.repository.TourEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,11 +20,22 @@ public class TourLog {
     @JsonIgnore
     private TourEntity tour;
 
+    @NotNull(message = "Log date and time is missing")
     private LocalDateTime logDateTime;
+
+    @NotBlank(message = "Comment is missing")
     private String comment;
+
+    @NotNull(message = "Difficulty is missing")
     private int difficulty;
+
+    @NotNull(message = "Total distance is missing")
     private double totalDistance;
+
+    @NotBlank(message = "Total time is missing")
     private String totalTime;
+
+    @NotBlank(message = "Rating is missing")
     private String rating;
 
 }

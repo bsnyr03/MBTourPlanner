@@ -2,6 +2,7 @@ package at.fhtw.mbtourplanner.controller;
 
 import at.fhtw.mbtourplanner.model.Tour;
 import at.fhtw.mbtourplanner.service.TourService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class TourController {
     }
 
     @PostMapping
-    public void addTour(@RequestBody Tour tour) throws SQLException {
+    public void addTour(@Valid @RequestBody Tour tour) throws SQLException {
         tourService.addTour(tour);
     }
 
@@ -33,7 +34,7 @@ public class TourController {
     }
 
     @PutMapping("/{id}")
-    public Tour updateTour(@PathVariable Long id, @RequestBody Tour tour) throws SQLException {
+    public Tour updateTour(@Valid @PathVariable Long id, @RequestBody Tour tour) throws SQLException {
         return tourService.updateTour(id, tour);
     }
 
