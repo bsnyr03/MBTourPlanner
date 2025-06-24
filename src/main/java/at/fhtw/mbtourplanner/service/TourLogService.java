@@ -29,6 +29,11 @@ public class TourLogService {
         return mapper.toDto(ents);
     }
 
+    public List<TourLog> searchLogs(Long tourId, String q) throws SQLException {
+        List<TourLogEntity> ents = tourLogRepository.searchLogs(tourId, q);
+        return mapper.toDto(ents);
+    }
+
     public TourLog getLog(Long tourId, Long logId) throws SQLException{
         TourLogEntity tourLogEntity = tourLogRepository.findById(logId).orElseThrow(() -> new RuntimeException("TourLog not found"));
         if(!tourLogEntity.getTour().getId().equals(tourId)) {

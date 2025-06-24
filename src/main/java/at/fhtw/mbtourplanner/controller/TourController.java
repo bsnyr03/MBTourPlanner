@@ -43,4 +43,12 @@ public class TourController {
         tourService.deleteTour(id);
     }
 
+    @GetMapping("/search")
+    public List<Tour> searchTours(@RequestParam String q) {
+        log.info("Searching tours with query: {}", q);
+        return tourService.searchTours(q);
+    }
+
+
+
 }

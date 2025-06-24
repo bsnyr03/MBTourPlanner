@@ -42,6 +42,10 @@ public class TourLogController {
         tourLogService.deleteLog(tourId, id);
     }
 
+    @GetMapping("/search")
+    public List<TourLog> search(@PathVariable Long tourId, @RequestParam String q) throws SQLException {
+        return tourLogService.searchLogs(tourId, q);
+    }
 
 
 }

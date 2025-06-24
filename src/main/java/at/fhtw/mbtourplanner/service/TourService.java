@@ -21,6 +21,11 @@ public class TourService {
         return tourMapper.toDto(tourRepository.findAll());
     }
 
+    public List<Tour> searchTours(String q) {
+        List<TourEntity> tourEntities = tourRepository.searchTours(q);
+        return tourMapper.toDto(tourEntities);
+    }
+
     public void addTour(Tour tour) throws SQLException {
         tourRepository.save(tourMapper.toEntity(tour));
     }
