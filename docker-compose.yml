@@ -11,6 +11,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    command: >
+      sh -c "rm -rf /var/lib/postgresql/data/* && exec docker-entrypoint.sh postgres"
     ports:
       - "5432:5432"
 

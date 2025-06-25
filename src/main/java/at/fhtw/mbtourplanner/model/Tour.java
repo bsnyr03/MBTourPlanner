@@ -1,4 +1,5 @@
 package at.fhtw.mbtourplanner.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -31,4 +32,11 @@ public class Tour {
 
     @NotBlank(message = "Route image URL is missing")
     private String routeImageUrl;
+
+    @NotNull(message = "popularity is missing")
+    private int popularity;
+
+    @NotNull(message = "childFriendliness is missing")
+    private double childFriendliness;
+
 }

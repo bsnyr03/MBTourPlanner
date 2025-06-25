@@ -19,13 +19,13 @@ public class TourEntity {
     @Column(length = 1000)
     private String description;
 
-    @Column(nullable = false)
+    @Column(name = "from_location",nullable = false)
     private String fromLocation;
 
-    @Column(nullable = false)
+    @Column(name = "to_location", nullable = false)
     private String toLocation;
 
-    @Column(nullable = false)
+    @Column(name = "transport_type", nullable = false)
     private String transportType;
 
     private double distance;
@@ -33,5 +33,12 @@ public class TourEntity {
     @Column(name = "estimated_time")
     private String estimatedTime;
 
+    @Column(name = "route_image_url")
     private String routeImageUrl;
+
+    @Column(name = "popularity")
+    private int popularity;
+
+    @Column(name = "child_friendliness")
+    private double childFriendliness;
 }

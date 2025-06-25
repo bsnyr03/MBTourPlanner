@@ -1,5 +1,8 @@
-DROP TABLE IF EXISTS tours CASCADE;
+DROP SEQUENCE IF EXISTS tours_id_seq CASCADE;
+DROP SEQUENCE IF EXISTS tour_logs_id_seq CASCADE;
+
 DROP TABLE IF EXISTS tour_logs CASCADE;
+DROP TABLE IF EXISTS tours CASCADE;
 
 CREATE TABLE IF NOT EXISTS tours
 (
@@ -29,7 +32,11 @@ CREATE TABLE IF NOT EXISTS tours
     estimated_time
     INTERVAL,
     route_image_url
-    TEXT
+    TEXT,
+    popularity
+    INTEGER,
+    child_friendliness
+    DOUBLE PRECISION
 );
 
 CREATE TABLE IF NOT EXISTS tour_logs
@@ -64,8 +71,8 @@ CREATE TABLE IF NOT EXISTS tour_logs
     rating
     INTEGER
     NOT
-    NULL,
-)
+    NULL
+);
     INSERT INTO tours
 (
     name,
@@ -75,7 +82,9 @@ CREATE TABLE IF NOT EXISTS tour_logs
     transport_type,
     distance,
     estimated_time,
-    route_image_url
+    route_image_url,
+    popularity,
+    child_friendliness
 )
     VALUES
 (
@@ -86,7 +95,9 @@ CREATE TABLE IF NOT EXISTS tour_logs
     'bike',
     12.5,
     '2 hours',
-    'https://example.com/city-tour.png'
+    'https://example.com/city-tour.png',
+    5,
+    4.5
 ),
 (
     'Mountain Hike',
@@ -96,7 +107,9 @@ CREATE TABLE IF NOT EXISTS tour_logs
     'hike',
     8.0,
     '4 hours',
-    'https://example.com/mountain-hike.png'
+    'https://example.com/mountain-hike.png',
+    4,
+    3.0
 ),
 (
     'Beach Vacation',
@@ -106,7 +119,9 @@ CREATE TABLE IF NOT EXISTS tour_logs
     'walk',
     5.0,
     '2 hours',
-    'https://example.com/beach-vacation.png'
+    'https://example.com/beach-vacation.png',
+    3,
+    5.0
 );
 
 

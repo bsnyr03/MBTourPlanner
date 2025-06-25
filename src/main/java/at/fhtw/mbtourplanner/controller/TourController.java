@@ -19,7 +19,7 @@ public class TourController {
     private final TourService tourService;
 
     @GetMapping
-    public List<Tour> getAll() {
+    public List<Tour> getAll() throws SQLException {
         return tourService.getAllTours();
     }
 
