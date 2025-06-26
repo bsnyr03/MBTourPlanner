@@ -29,7 +29,7 @@ public class Tour {
     @NotNull(message = "Distance is missing")
     private double distance;
 
-    @NotBlank(message = "Estimated time is missing")
+    @NotNull(message = "Estimated time is missing")
     private Duration estimatedTime;
 
     @NotBlank(message = "Route image URL is missing")
