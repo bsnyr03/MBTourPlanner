@@ -65,9 +65,8 @@ CREATE TABLE IF NOT EXISTS tour_logs
     NOT
     NULL,
     total_time
-    TEXT
-    NOT
-    NULL,
+    INTERVAL
+    NOT NULL ,
     rating
     INTEGER
     NOT
@@ -126,6 +125,6 @@ CREATE TABLE IF NOT EXISTS tour_logs
 
 
 INSERT INTO tour_logs (tour_id, log_datetime, comment, difficulty, total_distance, total_time, rating)
-VALUES (1, '2023-10-01 10:00:00', 'Great tour, very informative!', 2, 12.5, '2 hours', 5),
-       (2, '2023-10-02 09:30:00', 'Challenging but worth it for the views.', 4, 8.0, '4 hours', 4),
-       (3, '2023-10-03 11:00:00', 'Relaxing and beautiful scenery.', 1, 5.0, '2 hours', 5);
+VALUES (1, '2023-10-01 10:00:00', 'Great tour, very informative!', 2, 12.5, INTERVAL '2 hours', 5),
+       (2, '2023-10-02 09:30:00', 'Challenging but worth it for the views.', 4, 8.0, INTERVAL '4 hours', 4),
+       (3, '2023-10-03 11:00:00', 'Relaxing and beautiful scenery.', 1, 5.0, INTERVAL '2 hours', 5);

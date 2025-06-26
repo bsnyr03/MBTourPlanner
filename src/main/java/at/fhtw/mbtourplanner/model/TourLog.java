@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Data
@@ -32,8 +33,8 @@ public class TourLog {
     @NotNull(message = "Total distance is missing")
     private double totalDistance;
 
-    @NotBlank(message = "Total time is missing")
-    private String totalTime;
+    @NotNull(message = "Total time is missing")
+    private Duration totalTime;
 
     @NotBlank(message = "Rating is missing")
     private String rating;

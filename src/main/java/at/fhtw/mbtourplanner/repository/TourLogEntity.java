@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,7 +39,7 @@ public class TourLogEntity {
     private double totalDistance;
 
     @Column(name = "total_time", nullable = false)
-    private String totalTime;
+    private Duration totalTime;
 
     @Column(nullable = false)
     private String rating;

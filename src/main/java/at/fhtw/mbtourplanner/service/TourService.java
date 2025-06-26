@@ -91,27 +91,10 @@ public class TourService {
 
 
         // Durchschnittliche Zeit in Sekunden
-        double averageTime = logs.stream().mapToDouble(TourLogEntity::getTotalDistance).average().orElse(0);
+        double averageTime = logs.stream().mapToDouble(tourLogEntity -> tourLogEntity.getTotalTime().getSeconds()).average().orElse(0);
 
         // Durchschnittliche Bewertung: je niedriger Difficulty, desto höher die Bewertung
         return (6- averageDifference) + (1000-averageDifference) / 200 + (3600 - averageTime) / 600;
 
-    }
-
-    // Parset eine Uhrzeit im Format "HH:MM:SS" oder "MM:SS" oder "SS" in Sekunden
-    private long parseTimeToSeconds(String hms) {
-        String[] parts = hms.split(":");
-        long seconds = 0;
-        if (parts.length == 3) {
-            seconds += Long.parseLong(parts[0]) * 3600; // Stunden
-            seconds += Long.parseLong(parts[1]) * 60;   // Minuten
-            seconds += Long.parseLong(parts[2]);        // Sekunden
-        } else if (parts.length == 2) {
-            seconds += Long.parseLong(parts[0]) * 60;   // Minuten
-            seconds += Long.parseLong(parts[1]);         // Sekunden
-        } else if (parts.length == 1) {
-            seconds += Long.parseLong(parts[0]);         // Sekunden
-        }
-        return seconds;
     }
 }
