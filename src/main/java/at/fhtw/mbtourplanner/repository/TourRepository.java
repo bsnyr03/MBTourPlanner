@@ -15,7 +15,6 @@ public interface TourRepository extends JpaRepository<TourEntity, Long> {
             OR LOWER(t.fromLocation) LIKE LOWER(CONCAT('%', :q, '%'))
             OR LOWER(t.toLocation) LIKE LOWER(CONCAT('%', :q, '%'))
             OR LOWER(t.transportType) LIKE LOWER(CONCAT('%', :q, '%'))
-            OR LOWER(t.estimatedTime) LIKE LOWER(CONCAT('%', :q, '%'))
             OR LOWER(t.routeImageUrl) LIKE LOWER(CONCAT('%', :q, '%'))        
 """)
     List<TourEntity> searchTours(@Param("q") String query);

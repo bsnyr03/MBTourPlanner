@@ -1,6 +1,7 @@
 package at.fhtw.mbtourplanner.repository;
 
 
+import at.fhtw.mbtourplanner.controller.DurationToIntervalConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,7 @@ public class TourLogEntity {
     private double totalDistance;
 
     @Column(name = "total_time", nullable = false)
+    @Convert(converter = DurationToIntervalConverter.class)
     private Duration totalTime;
 
     @Column(nullable = false)

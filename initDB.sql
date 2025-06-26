@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS tours
     DOUBLE
     PRECISION,
     estimated_time
-    INTERVAL,
+    INTERVAL
+    NOT NULL,
     route_image_url
     TEXT,
     popularity
@@ -93,7 +94,7 @@ CREATE TABLE IF NOT EXISTS tour_logs
     'City Park',
     'bike',
     12.5,
-    '2 hours',
+    INTERVAL '2 hours',
     'https://example.com/city-tour.png',
     5,
     4.5
@@ -105,7 +106,7 @@ CREATE TABLE IF NOT EXISTS tour_logs
     'Summit',
     'hike',
     8.0,
-    '4 hours',
+    INTERVAL '4 hours',
     'https://example.com/mountain-hike.png',
     4,
     3.0
@@ -117,7 +118,7 @@ CREATE TABLE IF NOT EXISTS tour_logs
     'Lighthouse',
     'walk',
     5.0,
-    '2 hours',
+    INTERVAL'2 hours',
     'https://example.com/beach-vacation.png',
     3,
     5.0

@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.Duration;
+
 @Data
 @Builder
 public class Tour {
@@ -28,7 +30,7 @@ public class Tour {
     private double distance;
 
     @NotBlank(message = "Estimated time is missing")
-    private String estimatedTime;
+    private Duration estimatedTime;
 
     @NotBlank(message = "Route image URL is missing")
     private String routeImageUrl;

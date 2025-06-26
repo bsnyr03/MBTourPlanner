@@ -1,6 +1,9 @@
 package at.fhtw.mbtourplanner.repository;
+import at.fhtw.mbtourplanner.controller.DurationToIntervalConverter;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.Duration;
 
 @Entity
 @AllArgsConstructor
@@ -31,7 +34,8 @@ public class TourEntity {
     private double distance;
 
     @Column(name = "estimated_time")
-    private String estimatedTime;
+    @Convert(converter = DurationToIntervalConverter.class)
+    private Duration estimatedTime;
 
     @Column(name = "route_image_url")
     private String routeImageUrl;
