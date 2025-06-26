@@ -1,7 +1,11 @@
 package at.fhtw.mbtourplanner.repository;
 
 
-import at.fhtw.mbtourplanner.controller.DurationToIntervalConverter;
+import at.fhtw.mbtourplanner.converter.DurationToIntervalConverter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import at.fhtw.mbtourplanner.converter.DurationToIntervalSerializer;
+import at.fhtw.mbtourplanner.converter.DurationToIntervalDeserializer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +43,8 @@ public class TourLogEntity {
     @Column(name = "total_distance", nullable = false)
     private double totalDistance;
 
+    @JsonSerialize(using = DurationToIntervalSerializer.class)
+    @JsonDeserialize(using = DurationToIntervalDeserializer.class)
     @Column(name = "total_time", nullable = false)
     @Convert(converter = DurationToIntervalConverter.class)
     private Duration totalTime;

@@ -1,4 +1,4 @@
-package at.fhtw.mbtourplanner.controller;
+package at.fhtw.mbtourplanner.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

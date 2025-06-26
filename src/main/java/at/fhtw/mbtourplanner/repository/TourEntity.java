@@ -1,5 +1,9 @@
 package at.fhtw.mbtourplanner.repository;
-import at.fhtw.mbtourplanner.controller.DurationToIntervalConverter;
+import at.fhtw.mbtourplanner.converter.DurationToIntervalConverter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import at.fhtw.mbtourplanner.converter.DurationToIntervalSerializer;
+import at.fhtw.mbtourplanner.converter.DurationToIntervalDeserializer;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +37,8 @@ public class TourEntity {
 
     private double distance;
 
+    @JsonSerialize(using = DurationToIntervalSerializer.class)
+    @JsonDeserialize(using = DurationToIntervalDeserializer.class)
     @Column(name = "estimated_time")
     @Convert(converter = DurationToIntervalConverter.class)
     private Duration estimatedTime;
