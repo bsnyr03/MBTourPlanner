@@ -104,15 +104,23 @@ public class TourLogService {
         }
 
         // Durchschnittlicher Schwierigkeitsgrad
-        double averageDifference = logs.stream().mapToInt(TourLogEntity::getDifficulty).average().orElse(0);
-
+        double averageDifficulty = logs.stream().mapToInt(TourLogEntity::getDifficulty).average().orElse(0);
+        double differenceScore = 6 - averageDifficulty; // Bereich: [1, 5]
 
         // Durchschnittliche Zeit in Sekunden
-        double averageTime = logs.stream().mapToDouble(tourLogEntity -> tourLogEntity.getTotalTime().getSeconds()).average().orElse(0);
+        double averageTimeInSeconds = logs.stream().mapToDouble(tourLogEntity -> tourLogEntity.getTotalTime().getSeconds()).average().orElse(0);
+        double averegeTimeInHours = averageTimeInSeconds / 3600.00;
+        // Kürzere Tour = höherer Score, z.B. max 10h = Score bis ~10,
+        double timeScore = Math.max(0, 10.0 - averegeTimeInHours); // Bereich: [0, 10]
+
+        // Durchschnittliche Distanz in Metern
+        double averageDistance = logs.stream().mapToDouble(TourLogEntity::getTotalDistance).average().orElse(0);
+        // Kürzere Strecke = höherer Score, z.B. max 10 km → Score bis ~10
+        double distanceScore =  Math.max(0, 10.0 - averageDistance);
+
 
         // Durchschnittliche Bewertung: je niedriger Difficulty, desto höher die Bewertung
-        return (6- averageDifference) + (1000-averageDifference) / 200 + (3600 - averageTime) / 600;
-
+        return differenceScore + timeScore + distanceScore;
     }
 
 }

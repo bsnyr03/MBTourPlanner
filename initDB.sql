@@ -96,8 +96,8 @@ CREATE TABLE IF NOT EXISTS tour_logs
     12.5,
     INTERVAL '2 hours',
     'https://example.com/city-tour.png',
-    5,
-    4.5
+    1,
+    0
 ),
 (
     'Mountain Hike',
@@ -108,8 +108,8 @@ CREATE TABLE IF NOT EXISTS tour_logs
     8.0,
     INTERVAL '4 hours',
     'https://example.com/mountain-hike.png',
-    4,
-    3.0
+    1,
+    0
 ),
 (
     'Beach Vacation',
@@ -120,8 +120,8 @@ CREATE TABLE IF NOT EXISTS tour_logs
     5.0,
     INTERVAL'2 hours',
     'https://example.com/beach-vacation.png',
-    3,
-    5.0
+    1,
+    0
 );
 
 

@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import at.fhtw.mbtourplanner.converter.DurationToIntervalSerializer;
 import at.fhtw.mbtourplanner.converter.DurationToIntervalDeserializer;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
