@@ -5,9 +5,15 @@ import at.fhtw.mbtourplanner.service.TourService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.processing.SQL;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -47,6 +53,14 @@ public class TourController {
     public List<Tour> searchTours(@RequestParam String q) {
         log.info("Searching tours with query: {}", q);
         return tourService.searchTours(q);
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<List<Tour>> exportALlToursJSON() throws SQLException {
+        List<Tour> tours = tourService.getAllTours();
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=tours.json")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(tours);
     }
 
 
