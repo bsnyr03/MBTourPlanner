@@ -5,6 +5,7 @@ import at.fhtw.mbtourplanner.service.TourService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.hibernate.annotations.processing.SQL;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +64,12 @@ public class TourController {
                 .body(tours);
     }
 
-
+    @PostMapping("/import")
+    public ResponseEntity<Map<String, Integer>> importAllToursJSON(@RequestBody List<Tour> tours) throws SQLException {
+        for (Tour tour : tours) {
+            tourService.addTour(tour);
+        }
+        return ResponseEntity.ok(Map.of("imported", tours.size(), "status", HttpStatus.OK.value()));
+    }
 
 }
