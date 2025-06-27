@@ -49,6 +49,7 @@ public class TourLogService {
         tourLogEntity.setTour(tour);
         tourLogRepository.save(tourLogEntity);
 
+        validateTourLog(tourLogEntity);
         updateTourStats(tour, tourId);
 
         return mapper.toDto(tourLogEntity);
@@ -69,6 +70,7 @@ public class TourLogService {
         existing.setRating(dto.getRating());
         TourLogEntity saved = tourLogRepository.save(existing);
 
+        validateTourLog(existing);
         updateTourStats(tour, tourId);
 
         return mapper.toDto(saved);
@@ -121,6 +123,16 @@ public class TourLogService {
 
         // Durchschnittliche Bewertung: je niedriger Difficulty, desto höher die Bewertung
         return differenceScore + timeScore + distanceScore;
+    }
+
+    private void validateTourLog(TourLogEntity tourLogEntity) throws SQLException {
+        if(tourLogEntity.getDifficulty() < 1 || tourLogEntity.getDifficulty() > 5) {
+            throw new SQLException("Difficulty must be between 1 and 5");
+        }
+
+        if (tourLogEntity.getRating() < 1 || tourLogEntity.getRating() > 5) {
+            throw new SQLException("Rating must be between 1 and 5");
+        }
     }
 
 }

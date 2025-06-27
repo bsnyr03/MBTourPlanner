@@ -52,6 +52,6 @@ public class TourLogEntity {
     private Duration totalTime;
 
     @Column(nullable = false)
-    private String rating;
+    private int rating;
 
 }

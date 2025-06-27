@@ -36,7 +36,7 @@ public class TourLog {
     @NotNull(message = "Total time is missing")
     private Duration totalTime;
 
-    @NotBlank(message = "Rating is missing")
-    private String rating;
+    @NotNull(message = "Rating is missing")
+    private int rating;
 
 }
