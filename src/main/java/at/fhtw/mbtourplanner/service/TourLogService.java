@@ -47,6 +47,16 @@ public class TourLogService {
         TourLogEntity tourLogEntity = mapper.toEntity(tourLog);
         tourLogEntity.setTour(tour);
         tourLogRepository.save(tourLogEntity);
+
+        // Wiederberechnung der Popularität und ChildFriendliness
+        int popularity = tourLogRepository.countByTourId(tour.getId());
+        //double childFriendliness = new TourService(tourRepository, null, tourLogRepository).computeChildFriendliness(tourId);
+
+        tour.setPopularity(popularity);
+        //tour.setChildFriendliness(childFriendliness);
+        tourRepository.save(tour);
+
+
         return mapper.toDto(tourLogEntity);
     }
 

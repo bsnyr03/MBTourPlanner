@@ -22,22 +22,7 @@ public class TourService {
     private final TourLogRepository tourLogRepository;
 
     public List<Tour> getAllTours() throws SQLException {
-        List<TourEntity> tourEntities = tourRepository.findAll();
-        List<Tour> dtos = new ArrayList<>();
-
-        for (TourEntity tourEntity : tourEntities) {
-
-            Tour dto = tourMapper.toDto(tourEntity);
-
-            int popularity = tourLogRepository.countByTourId(tourEntity.getId());
-            dto.setPopularity(popularity);
-
-            double childFriendliness = computeChildFriendliness(tourEntity);
-            dto.setChildFriendliness(childFriendliness);
-
-            dtos.add(dto);
-        }
-        return dtos;
+        return tourMapper.toDto(tourRepository.findAll());
     }
 
     public List<Tour> searchTours(String q) {
@@ -80,7 +65,7 @@ public class TourService {
     }
 
     // Berechnet einen einfachen ChildFrindliness-Wert aus Difficulty und Zeit und Distance
-    private double computeChildFriendliness(TourEntity tourEntity) {
+    public double computeChildFriendliness(TourEntity tourEntity) {
         List<TourLogEntity> logs = tourLogRepository.findAllByTour(tourEntity);
         if(logs.isEmpty()){
             return 0.0;
