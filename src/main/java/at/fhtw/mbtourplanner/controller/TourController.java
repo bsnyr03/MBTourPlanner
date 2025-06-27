@@ -1,8 +1,10 @@
 package at.fhtw.mbtourplanner.controller;
 
 import at.fhtw.mbtourplanner.model.Tour;
+import at.fhtw.mbtourplanner.repository.TourEntity;
+import at.fhtw.mbtourplanner.service.TourMapper;
 import at.fhtw.mbtourplanner.service.TourService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReader;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +14,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
@@ -25,7 +31,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class TourController {
     private final TourService tourService;
-    private final ObjectMapper objectMapper;
+    private final TourMapper tourMapper;
 
     @GetMapping
     public List<Tour> getAll() throws SQLException {
@@ -111,6 +117,41 @@ public class TourController {
                 .body(csvBytes);
 
     }
+
+    @PostMapping(value = "/import/csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Integer>> importAllToursCSV(@RequestParam ("file") MultipartFile file) throws Exception {
+        List<TourEntity> toImport = new ArrayList<>();
+        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            reader.readNext();
+            String[] line;
+            while ((line = reader.readNext()) != null) {
+                TourEntity tour = new TourEntity();
+                tour.setName(line[1]);
+                tour.setDescription(line[2]);
+                tour.setFromLocation(line[3]);
+                tour.setToLocation(line[4]);
+                tour.setTransportType(line[5]);
+                tour.setDistance(Double.parseDouble(line[6]));
+                tour.setEstimatedTime(Duration.parse(line[7]));
+                tour.setRouteImageUrl(line[8]);
+                tour.setPopularity(Integer.parseInt(line[9]));
+                tour.setChildFriendliness(Double.parseDouble(line[10]));
+                toImport.add(tour);
+            }
+
+        } catch (Exception e) {
+            log.error("Error reading CSV file: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("imported", 0, "status", HttpStatus.BAD_REQUEST.value()));
+        }
+
+        for (TourEntity tourEntity : toImport) {
+            tourService.addTour(tourMapper.toDto(tourEntity));
+        }
+
+        return ResponseEntity.ok(Map.of("imported", toImport.size(), "status", HttpStatus.OK.value()));
+    }
+
 
 
 
