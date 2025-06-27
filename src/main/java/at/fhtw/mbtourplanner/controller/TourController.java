@@ -2,17 +2,18 @@ package at.fhtw.mbtourplanner.controller;
 
 import at.fhtw.mbtourplanner.model.Tour;
 import at.fhtw.mbtourplanner.service.TourService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
-import org.hibernate.annotations.processing.SQL;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class TourController {
     private final TourService tourService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping
     public List<Tour> getAll() throws SQLException {
@@ -71,5 +73,47 @@ public class TourController {
         }
         return ResponseEntity.ok(Map.of("imported", tours.size(), "status", HttpStatus.OK.value()));
     }
+
+
+    @GetMapping(value = "/export/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> exportAllToursCSV() throws SQLException {
+        List<Tour> tours = null;
+        try {
+            tours = tourService.getAllTours();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        StringBuilder sb = new StringBuilder();
+
+        // CSV header
+        sb.append("id,name, description, fromLocation, toLocation, transportType, distance, estimatedTime, routeImageURL, popularity, childFriendliness\n");
+
+        // CSV rows
+        for (Tour tour : tours) {
+            sb.append(tour.getId()).append(",")
+                    .append(tour.getName()).append(",")
+                    .append(tour.getDescription()).append(",")
+                    .append(tour.getFromLocation()).append(",")
+                    .append(tour.getToLocation()).append(",")
+                    .append(tour.getTransportType()).append(",")
+                    .append(tour.getDistance()).append(",")
+                    .append(tour.getEstimatedTime()).append(",")
+                    .append(tour.getRouteImageUrl()).append(",")
+                    .append(tour.getPopularity()).append(",")
+                    .append(tour.getChildFriendliness())
+                    .append("\n");
+        }
+
+        byte[] csvBytes = sb.toString().getBytes(StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=tours.csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(csvBytes);
+
+    }
+
+
+
+
 
 }
