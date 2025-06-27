@@ -1,6 +1,7 @@
 package at.fhtw.mbtourplanner.service;
 
 
+import at.fhtw.mbtourplanner.model.Tour;
 import at.fhtw.mbtourplanner.model.TourLog;
 import at.fhtw.mbtourplanner.repository.TourEntity;
 import at.fhtw.mbtourplanner.repository.TourLogEntity;
@@ -48,19 +49,14 @@ public class TourLogService {
         tourLogEntity.setTour(tour);
         tourLogRepository.save(tourLogEntity);
 
-        // Wiederberechnung der Popularität und ChildFriendliness
-        int popularity = tourLogRepository.countByTourId(tour.getId());
-        //double childFriendliness = new TourService(tourRepository, null, tourLogRepository).computeChildFriendliness(tourId);
-
-        tour.setPopularity(popularity);
-        //tour.setChildFriendliness(childFriendliness);
-        tourRepository.save(tour);
-
+        updateTourStats(tour, tourId);
 
         return mapper.toDto(tourLogEntity);
     }
 
     public TourLog updateLog(Long tourId, Long logId, TourLog dto) throws SQLException {
+        TourEntity tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new RuntimeException("Tour not found"));
         TourLogEntity existing = tourLogRepository.findById(logId)
                 .orElseThrow(() -> new RuntimeException("Log not found"));
         if (!existing.getTour().getId().equals(tourId))
@@ -72,17 +68,51 @@ public class TourLogService {
         existing.setTotalTime(dto.getTotalTime());
         existing.setRating(dto.getRating());
         TourLogEntity saved = tourLogRepository.save(existing);
+
+        updateTourStats(tour, tourId);
+
         return mapper.toDto(saved);
     }
 
     public void deleteLog(Long tourId, Long logId) throws SQLException {
+        TourEntity tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new RuntimeException("Tour not found"));
         TourLogEntity tourLogEntity = tourLogRepository.findById(logId).orElseThrow(() -> new RuntimeException("TourLog not found"));
         if (!tourLogEntity.getTour().getId().equals(tourId)) {
             throw new RuntimeException("TourLog does not belong to the specified Tour");
         }
+
+        updateTourStats(tour, tourId);
+
         tourLogRepository.delete(tourLogEntity);
     }
 
+    public void updateTourStats(TourEntity tour, Long tourId) throws SQLException {
 
+        int popularity = tourLogRepository.countByTourId(tour.getId());
+        double childFriendliness = computeChildFriendliness(tour);
+        tour.setPopularity(popularity);
+        tour.setChildFriendliness(childFriendliness);
+        tourRepository.save(tour);
+    }
+
+    // Berechnet einen einfachen ChildFrindliness-Wert aus Difficulty und Zeit und Distance
+    private double computeChildFriendliness(TourEntity tourEntity) {
+        List<TourLogEntity> logs = tourLogRepository.findAllByTour(tourEntity);
+        if(logs.isEmpty()){
+            return 0.0;
+        }
+
+        // Durchschnittlicher Schwierigkeitsgrad
+        double averageDifference = logs.stream().mapToInt(TourLogEntity::getDifficulty).average().orElse(0);
+
+
+        // Durchschnittliche Zeit in Sekunden
+        double averageTime = logs.stream().mapToDouble(tourLogEntity -> tourLogEntity.getTotalTime().getSeconds()).average().orElse(0);
+
+        // Durchschnittliche Bewertung: je niedriger Difficulty, desto höher die Bewertung
+        return (6- averageDifference) + (1000-averageDifference) / 200 + (3600 - averageTime) / 600;
+
+    }
 
 }

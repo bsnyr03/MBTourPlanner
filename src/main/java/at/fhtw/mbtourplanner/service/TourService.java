@@ -37,10 +37,6 @@ public class TourService {
     public Tour getTourById(Long id) throws SQLException {
         TourEntity tourEntity = tourRepository.findById(id).orElseThrow(() -> new RuntimeException("Tour not found"));
         Tour dto = tourMapper.toDto(tourEntity);
-
-        dto.setPopularity(tourLogRepository.countByTourId(id));
-        dto.setChildFriendliness(computeChildFriendliness(tourEntity));
-
         return dto;
     }
 
@@ -62,24 +58,5 @@ public class TourService {
     public void deleteTour(Long id) throws SQLException {
         TourEntity tourEntity = tourRepository.findById(id).orElseThrow(() -> new RuntimeException("Tour not found"));
         tourRepository.delete(tourEntity);
-    }
-
-    // Berechnet einen einfachen ChildFrindliness-Wert aus Difficulty und Zeit und Distance
-    public double computeChildFriendliness(TourEntity tourEntity) {
-        List<TourLogEntity> logs = tourLogRepository.findAllByTour(tourEntity);
-        if(logs.isEmpty()){
-            return 0.0;
-        }
-
-        // Durchschnittlicher Schwierigkeitsgrad
-        double averageDifference = logs.stream().mapToInt(TourLogEntity::getDifficulty).average().orElse(0);
-
-
-        // Durchschnittliche Zeit in Sekunden
-        double averageTime = logs.stream().mapToDouble(tourLogEntity -> tourLogEntity.getTotalTime().getSeconds()).average().orElse(0);
-
-        // Durchschnittliche Bewertung: je niedriger Difficulty, desto höher die Bewertung
-        return (6- averageDifference) + (1000-averageDifference) / 200 + (3600 - averageTime) / 600;
-
     }
 }
