@@ -3,20 +3,25 @@ package at.fhtw.mbtourplanner.service;
 import at.fhtw.mbtourplanner.model.Tour;
 import at.fhtw.mbtourplanner.model.TourLog;
 import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.element.*;
+import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -25,7 +30,7 @@ public class ReportService {
     private final TourService tourService;
     private final TourLogService tourLogService;
 
-    public byte[] generateTourReportPDF(Long tourId) throws SQLException, IOException {
+    public byte[] generateTourReportPDF(Long tourId) throws Exception {
         Tour tour = tourService.getTourById(tourId);
 
         if(tour == null) {
@@ -39,6 +44,18 @@ public class ReportService {
         PdfDocument pdfDocument = new PdfDocument(writer);
         Document document = new Document(pdfDocument);
 
+        document.setMargins(20, 20, 20, 20);
+
+        if(tour.getRouteImageUrl() != null && !tour.getRouteImageUrl().isEmpty()) {
+            try{
+                Image img = new Image(ImageDataFactory.create(tour.getRouteImageUrl()))
+                        .scaleToFit(500, 300)
+                        .setHorizontalAlignment(HorizontalAlignment.CENTER);
+                document.add(img);
+                document.add(new Paragraph("\n"));
+            }catch (Exception ignore){}
+        }
+
         // Titel
         Paragraph title = new Paragraph("Tour Report: " + tour.getName())
                 .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
@@ -46,48 +63,95 @@ public class ReportService {
                 .setTextAlignment(TextAlignment.CENTER);
 
         document.add(title);
+
+        document.add(new LineSeparator(new SolidLine()));
+
         document.add(new Paragraph("\n"));
 
         // Tour Details
-        Table detailsTable = new Table(new float[]{1,3});
-        detailsTable.setWidth(100);
-        detailsTable.addCell(new Cell().add(new Paragraph("Description:")));
-        detailsTable.addCell(new Cell().add(new Paragraph(tour.getDescription())));
-        detailsTable.addCell(new Cell().add(new Paragraph("From -> To:")));
-        detailsTable.addCell(new Cell().add(new Paragraph(tour.getFromLocation() + " -> " + tour.getToLocation())));
-        detailsTable.addCell(new Cell().add(new Paragraph("Distance (km):")));
-        detailsTable.addCell(new Cell().add(new Paragraph(String.valueOf(tour.getDistance()))));
-        detailsTable.addCell(new Cell().add(new Paragraph("Estimated Time:")));
-        detailsTable.addCell(new Cell().add(new Paragraph(String.valueOf(tour.getEstimatedTime()))));
-        detailsTable.addCell(new Cell().add(new Paragraph("Popularity:")));
-        detailsTable.addCell(new Cell().add(new Paragraph(String.valueOf(tour.getPopularity()))));
-        detailsTable.addCell(new Cell().add(new Paragraph("ChildFriendliness:")));
-        detailsTable.addCell(new Cell().add(new Paragraph(String.format("%.2f", tour.getChildFriendliness()))));
+        Table detailsTable = new Table(UnitValue.createPercentArray(new float[]{1,3})).useAllAvailableWidth();
+        detailsTable.addCell(new Cell().add(new Paragraph("Description").setBold())
+                .setBorder(Border.NO_BORDER).setPadding(4));
+        detailsTable.addCell(new Cell().add(new Paragraph(tour.getDescription()))
+                .setBorder(Border.NO_BORDER).setPadding(4));
+
+        detailsTable.addCell(new Cell().add(new Paragraph("From → To").setBold())
+                .setBorder(Border.NO_BORDER).setPadding(4));
+        detailsTable.addCell(new Cell().add(new Paragraph(
+                        tour.getFromLocation() + " → " + tour.getToLocation()))
+                .setBorder(Border.NO_BORDER).setPadding(4));
+
+        detailsTable.addCell(new Cell().add(new Paragraph("Transport").setBold())
+                .setBorder(Border.NO_BORDER).setPadding(4));
+        detailsTable.addCell(new Cell().add(new Paragraph(tour.getTransportType()))
+                .setBorder(Border.NO_BORDER).setPadding(4));
+
+        detailsTable.addCell(new Cell().add(new Paragraph("Distance (km)").setBold())
+                .setBorder(Border.NO_BORDER).setPadding(4));
+        detailsTable.addCell(new Cell().add(new Paragraph(String.valueOf(tour.getDistance())))
+                .setBorder(Border.NO_BORDER).setPadding(4));
+
+        detailsTable.addCell(new Cell().add(new Paragraph("Est. Time").setBold())
+                .setBorder(Border.NO_BORDER).setPadding(4));
+        detailsTable.addCell(new Cell().add(new Paragraph(String.valueOf(tour.getEstimatedTime())))
+                .setBorder(Border.NO_BORDER).setPadding(4));
+
+        detailsTable.addCell(new Cell().add(new Paragraph("Popularity").setBold())
+                .setBorder(Border.NO_BORDER).setPadding(4));
+        detailsTable.addCell(new Cell().add(new Paragraph(String.valueOf(tour.getPopularity())))
+                .setBorder(Border.NO_BORDER).setPadding(4));
+
+        detailsTable.addCell(new Cell().add(new Paragraph("Child-Friendliness").setBold())
+                .setBorder(Border.NO_BORDER).setPadding(4));
+        detailsTable.addCell(new Cell().add(new Paragraph(
+                        String.format("%.2f", tour.getChildFriendliness())))
+                .setBorder(Border.NO_BORDER).setPadding(4));
+
         document.add(detailsTable);
         document.add(new Paragraph("\n"));
 
         // Tour Logs
         Paragraph subtitle = new Paragraph("Tour Logs")
                 .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
-                .setFontSize(14);
+                .setFontSize(14)
+                .setMarginTop(10);
         document.add(subtitle);
 
-        Table table = new Table(new float[]{2, 4, 2, 2, 2});
-        table.setWidth(100);
+        Table table = new Table(UnitValue.createPercentArray(new float[]{2, 4, 2, 2, 2, 2}))
+                .useAllAvailableWidth();
 
         // Header
         for(String h : List.of("Date/Time", "Comment", "Difficulty", "Total Distance", "Total Time", "Rating")) {
-            table.addHeaderCell(new Cell().add(new Paragraph(h)));
+            table.addHeaderCell(new Cell()
+                    .add(new Paragraph(h))
+                    .setBold()
+                    .setBackgroundColor(ColorConstants.LIGHT_GRAY)
+                    .setPadding(4));
         }
 
         // Content
-        for (TourLog tourLog : tourlogs) {
-            table.addCell(tourLog.getLogDateTime().toString());
-            table.addCell(tourLog.getComment());
-            table.addCell(String.valueOf(tourLog.getDifficulty()));
-            table.addCell(String.valueOf(tourLog.getTotalDistance()));
-            table.addCell(String.valueOf(tourLog.getTotalTime()));
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        for (TourLog l : tourlogs) {
+            table.addCell(new Cell()
+                    .add(new Paragraph(l.getLogDateTime().format(dtf)))
+                    .setPadding(3));
+            table.addCell(new Cell()
+                    .add(new Paragraph(l.getComment()))
+                    .setPadding(3));
+            table.addCell(new Cell()
+                    .add(new Paragraph(String.valueOf(l.getDifficulty())))
+                    .setPadding(3));
+            table.addCell(new Cell()
+                    .add(new Paragraph(String.valueOf(l.getTotalDistance())))
+                    .setPadding(3));
+            table.addCell(new Cell()
+                    .add(new Paragraph(l.getTotalTime().toString()))
+                    .setPadding(3));
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(l.getRating()))).setPadding(3));
+
+
         }
+
         document.add(table);
         document.close();
         return outputStream.toByteArray();
