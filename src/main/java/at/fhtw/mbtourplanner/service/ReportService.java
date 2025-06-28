@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -183,14 +184,25 @@ public class ReportService {
 
         // Rows
         for (Tour tour : tours) {
-            List <TourLog> logs = tourLogService.getLogsForTour(tour.getId());
+            List<TourLog> logs = tourLogService.getLogsForTour(tour.getId());
 
-            double avgTime = logs.stream().mapToDouble(log -> log.getTotalTime().toMinutes()).average().orElse(0);
             double avgDistance = logs.stream().mapToDouble(TourLog::getTotalDistance).average().orElse(0);
             double avgRating = logs.stream().mapToDouble(TourLog::getRating).average().orElse(0);
 
+            long avgTimeMinutes = (long) logs.stream()
+                .mapToLong(log -> log.getTotalTime().toMinutes())
+                .average()
+                .orElse(0);
+            Duration avgTime = Duration.ofMinutes(avgTimeMinutes);
+
+            String avgTimeFormatted = String.format("%02d:%02d:%02d",
+                avgTime.toHours(),
+                avgTime.toMinutesPart(),
+                avgTime.toSecondsPart()
+            );
+
             table.addCell(new Cell().add(new Paragraph(tour.getName())));
-            table.addCell(new Cell().add(new Paragraph(String.format("%.2f min", avgTime))));
+            table.addCell(new Cell().add(new Paragraph(avgTimeFormatted)));
             table.addCell(new Cell().add(new Paragraph(String.format("%.2f", avgDistance))));
             table.addCell(new Cell().add(new Paragraph(String.format("%.2f", avgRating))));
         }
