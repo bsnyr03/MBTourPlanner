@@ -156,4 +156,49 @@ public class ReportService {
         document.close();
         return outputStream.toByteArray();
     }
+
+    public byte[] generateSummaryReportPDF() throws Exception {
+        List<Tour> tours = tourService.getAllTours();
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(outputStream);
+        PdfDocument pdfDocument = new PdfDocument(writer);
+        Document document = new Document(pdfDocument);
+
+        Paragraph title = new Paragraph("Summary Tour Report")
+                .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
+                .setFontSize(18)
+                .setTextAlignment(TextAlignment.CENTER);
+
+        document.add(title);
+        document.add(new Paragraph("\n"));
+
+        Table table = new Table(UnitValue.createPercentArray(new float[]{4, 4, 4, 4}))
+                .useAllAvailableWidth();
+
+        // Header
+        for (String h : List.of("Tourname", "Average Time", "Average Distance", "Average Rating")){
+            table.addHeaderCell(new Cell().add(new Paragraph(h)));
+        }
+
+        // Rows
+        for (Tour tour : tours) {
+            List <TourLog> logs = tourLogService.getLogsForTour(tour.getId());
+
+            double avgTime = logs.stream().mapToDouble(log -> log.getTotalTime().toMinutes()).average().orElse(0);
+            double avgDistance = logs.stream().mapToDouble(TourLog::getTotalDistance).average().orElse(0);
+            double avgRating = logs.stream().mapToDouble(TourLog::getRating).average().orElse(0);
+
+            table.addCell(new Cell().add(new Paragraph(tour.getName())));
+            table.addCell(new Cell().add(new Paragraph(String.format("%.2f min", avgTime))));
+            table.addCell(new Cell().add(new Paragraph(String.format("%.2f", avgDistance))));
+            table.addCell(new Cell().add(new Paragraph(String.format("%.2f", avgRating))));
+        }
+
+        document.add(table);
+        document.close();
+        return outputStream.toByteArray();
+    }
+
+
 }
