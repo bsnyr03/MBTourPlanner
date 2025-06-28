@@ -5,6 +5,9 @@ import at.fhtw.mbtourplanner.repository.TourRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -19,7 +22,7 @@ class TourRepositoryTest {
                 .toLocation("B")
                 .transportType("bike")
                 .distance(10.0)
-                .estimatedTime("1:00:00")
+                .estimatedTime(Duration.ofHours(1))
                 .routeImageUrl("url")
                 .build();
     }

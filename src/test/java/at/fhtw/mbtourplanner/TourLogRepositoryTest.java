@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +29,7 @@ class TourLogRepositoryTest {
                         .toLocation("B")
                         .transportType("bike")
                         .distance(10.0)
-                        .estimatedTime("1:00:00")
+                        .estimatedTime(Duration.ofMinutes(30))
                         .routeImageUrl("url")
                         .build()
         );
@@ -40,8 +41,8 @@ class TourLogRepositoryTest {
                 .difficulty(2)
                 .logDateTime(LocalDateTime.now())
                 .totalDistance(5.0)
-                .totalTime("1:00:00")
-                .rating("5 stars")
+                .totalTime(Duration.ofMinutes(30))
+                .rating(5)
                 .tour(tour)
                 .build();
     }
