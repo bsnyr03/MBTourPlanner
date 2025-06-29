@@ -1,100 +1,105 @@
-package at.fhtw.mbtourplanner;
+package at.fhtw.mbtourplanner.controller;
 
-import at.fhtw.mbtourplanner.controller.TourLogController;
 import at.fhtw.mbtourplanner.model.TourLog;
 import at.fhtw.mbtourplanner.service.TourLogService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.sql.SQLException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.verify;
 
-@WebMvcTest(TourLogController.class)
+@ExtendWith(MockitoExtension.class)
 class TourLogControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private TourLogService tourLogService;
 
-    @Test
-    void getAllTourLogs_returnsOk() throws Exception {
-        when(tourLogService.getLogsForTour(1L)).thenReturn(List.of(
-                TourLog.builder().id(1L).comment("Test Log").build()
-        ));
+    @InjectMocks
+    private TourLogController controller;
 
-        mockMvc.perform(get("/api/tours/1/tour_logs"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    private TourLog sampleLog;
+
+    @BeforeEach
+    void setUp() {
+        sampleLog = TourLog.builder()
+                .id(1L)
+                .logDateTime(LocalDateTime.of(2025, 1, 1, 10, 0))
+                .comment("Great")
+                .difficulty(3)
+                .totalDistance(12.5)
+                .totalTime(Duration.ofHours(2))
+                .rating(4)
+                .build();
     }
 
     @Test
-    void getTourLogById_returnsOk() throws Exception {
-        when(tourLogService.getLog(1L, 2L)).thenReturn(
-                TourLog.builder().id(2L).comment("Test Log").build()
-        );
+    void getAll_ReturnsLogs() throws SQLException {
+        given(tourLogService.getLogsForTour(10L)).willReturn(List.of(sampleLog));
 
-        mockMvc.perform(get("/api/tours/1/tour_logs/2"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(2L));
+        List<TourLog> result = controller.getAll(10L);
+
+        assertThat(result).containsExactly(sampleLog);
+        verify(tourLogService).getLogsForTour(10L);
     }
 
     @Test
-    void getTourLogById_notFound() throws Exception {
-        when(tourLogService.getLog(1L, 99L)).thenReturn(null);
+    void getOneLog_ReturnsLog() throws SQLException {
+        given(tourLogService.getLog(10L, 1L)).willReturn(sampleLog);
 
-        mockMvc.perform(get("/api/tours/1/tour_logs/99"))
-                .andExpect(status().isNotFound());
+        TourLog result = controller.getOneLog(10L, 1L);
+
+        assertThat(result).isSameAs(sampleLog);
+        verify(tourLogService).getLog(10L, 1L);
     }
 
     @Test
-    void addTourLog_returnsCreated() throws Exception {
-        TourLog createdLog = TourLog.builder().id(3L).comment("New Log").build();
-        when(tourLogService.addLog(eq(1L), any(TourLog.class))).thenReturn(createdLog);
-        String json = "{\"comment\":\"New Log\"}";
+    void create_ReturnsCreatedLog() throws SQLException {
+        given(tourLogService.addLog(10L, sampleLog)).willReturn(sampleLog);
 
-        mockMvc.perform(post("/api/tours/1/tour_logs")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(3L))
-                .andExpect(jsonPath("$.comment").value("New Log"));
+        TourLog result = controller.create(10L, sampleLog);
+
+        assertThat(result).isSameAs(sampleLog);
+        verify(tourLogService).addLog(10L, sampleLog);
     }
 
     @Test
-    void updateTourLog_returnsOk() throws Exception {
-        TourLog updatedLog = TourLog.builder().id(2L).comment("Updated Log").build();
-        when(tourLogService.updateLog(eq(1L), eq(2L), any(TourLog.class))).thenReturn(updatedLog);
+    void update_ReturnsUpdatedLog() throws SQLException {
+        given(tourLogService.updateLog(10L, 1L, sampleLog)).willReturn(sampleLog);
 
-        String json = "{\"comment\":\"Updated Log\"}";
+        TourLog result = controller.update(10L, 1L, sampleLog);
 
-        mockMvc.perform(put("/api/tours/1/tour_logs/2")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(2L))
-                .andExpect(jsonPath("$.comment").value("Updated Log"));
+        assertThat(result).isSameAs(sampleLog);
+        verify(tourLogService).updateLog(10L, 1L, sampleLog);
     }
 
     @Test
-    void deleteTourLog_returnsNoContent() throws Exception {
-        doNothing().when(tourLogService).deleteLog(1L, 2L);
+    void delete_CallsService() throws SQLException {
+        doNothing().when(tourLogService).deleteLog(10L, 1L);
 
-        mockMvc.perform(delete("/api/tours/1/tour_logs/2"))
-                .andExpect(status().isNoContent());
+        controller.delete(10L, 1L);
+
+        verify(tourLogService).deleteLog(10L, 1L);
+    }
+
+    @Test
+    void search_ReturnsFiltered() throws SQLException {
+        given(tourLogService.searchLogs(10L, "q")).willReturn(List.of(sampleLog));
+
+        List<TourLog> result = controller.search(10L, "q");
+
+        assertThat(result).containsExactly(sampleLog);
+        verify(tourLogService).searchLogs(10L, "q");
     }
 }
