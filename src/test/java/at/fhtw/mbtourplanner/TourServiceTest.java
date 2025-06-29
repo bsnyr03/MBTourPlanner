@@ -76,6 +76,24 @@ public class TourServiceTest {
         verify(tourRepository).findAll();
     }
 
+    @Test
+    void searchTours_shouldDelegateToRepository() throws SQLException {
+        String q = "Sample";
+
+        when(tourRepository.searchTours(q)).thenReturn(List.of(sampleEntity));
+
+        var result = tourService.searchTours(q);
+
+        assertThat(result)
+                .hasSize(1)
+                .first().isSameAs(sampleDto);
+
+        verify(tourRepository).searchTours(q);
+    }
+
+
+
+
 
 
 
