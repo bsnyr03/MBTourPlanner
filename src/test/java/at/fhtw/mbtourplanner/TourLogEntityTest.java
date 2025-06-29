@@ -1,9 +1,11 @@
+package at.fhtw.mbtourplanner.repository;
+
 import at.fhtw.mbtourplanner.converter.DurationToIntervalConverter;
 import at.fhtw.mbtourplanner.converter.DurationToIntervalDeserializer;
 import at.fhtw.mbtourplanner.converter.DurationToIntervalSerializer;
-import at.fhtw.mbtourplanner.repository.TourLogEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,10 +15,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TourLogEntityTest {
+
     private DurationToIntervalConverter converter;
     private ObjectMapper mapper;
 
@@ -24,44 +27,51 @@ class TourLogEntityTest {
     void setup() {
         converter = new DurationToIntervalConverter();
         mapper = new ObjectMapper();
+
         SimpleModule module = new SimpleModule();
         module.addSerializer(Duration.class, new DurationToIntervalSerializer());
         module.addDeserializer(Duration.class, new DurationToIntervalDeserializer());
         mapper.registerModule(module);
+
         mapper.registerModule(new JavaTimeModule());
+
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        mapper.addMixIn(TourLogEntity.class, IgnoreTourMixin.class);
     }
 
-    @Test void testBuilder() {
+    @Test
+    void testBuilderAndAccessors() {
         TourLogEntity log = TourLogEntity.builder()
-                .comment("Nice!").difficulty(2)
-                .logDateTime(LocalDateTime.now())
+                .comment("Nice!")
+                .difficulty(2)
+                .logDateTime(LocalDateTime.of(2025, 6, 30, 14, 15))
                 .totalDistance(5.0)
                 .totalTime(Duration.ofHours(1))
-                .rating(5).build();
-        assertEquals("Nice!", log.getComment());
-        assertEquals(2, log.getDifficulty());
-    }
-    @Test void testSettersAndGetters() {
-        TourLogEntity log = new TourLogEntity();
-        log.setComment("Test");
-        assertEquals("Test", log.getComment());
+                .rating(5)
+                .build();
+
+        assertThat(log.getComment()).isEqualTo("Nice!");
+        assertThat(log.getDifficulty()).isEqualTo(2);
+        assertThat(log.getLogDateTime()).isEqualTo(LocalDateTime.of(2025, 6, 30, 14, 15));
     }
 
     @Test
     void converter_roundtrip() {
         Duration original = Duration.ofHours(3).plusMinutes(20).plusSeconds(45);
-        String db = converter.convertToDatabaseColumn(original);
-        assertThat(db).isEqualTo("03:20:45");
+        String dbValue = converter.convertToDatabaseColumn(original);
+        assertThat(dbValue).isEqualTo("03:20:45");
 
-        Duration back = converter.convertToEntityAttribute(db);
-        assertThat(back).isEqualTo(original);
+        Duration recovered = converter.convertToEntityAttribute(dbValue);
+        assertThat(recovered).isEqualTo(original);
     }
 
     @Test
     void jsonSerialize_deserialize() throws IOException {
         TourLogEntity entity = TourLogEntity.builder()
                 .id(5L)
-                .logDateTime(LocalDateTime.of(2025, 6, 30, 14, 15, 0))
+                .tour(null)
+                .logDateTime(LocalDateTime.of(2025, 6, 30, 14, 15))
                 .comment("Nice")
                 .difficulty(4)
                 .totalDistance(7.5)
@@ -78,7 +88,7 @@ class TourLogEntityTest {
 
         TourLogEntity round = mapper.readValue(json, TourLogEntity.class);
         assertThat(round.getId()).isEqualTo(5L);
-        assertThat(round.getLogDateTime()).isEqualTo(LocalDateTime.of(2025,6,30,14,15,0));
+        assertThat(round.getLogDateTime()).isEqualTo(LocalDateTime.of(2025, 6, 30, 14, 15));
         assertThat(round.getTotalTime()).isEqualTo(Duration.ofMinutes(90));
         assertThat(round.getComment()).isEqualTo("Nice");
     }
@@ -89,10 +99,6 @@ class TourLogEntityTest {
         assertThrows(IOException.class, () -> mapper.readValue(badJson, TourLogEntity.class));
     }
 
-    // Mixin to ignore TourEntity relation
     @JsonIgnoreProperties({"tour"})
     private static abstract class IgnoreTourMixin {}
-
-
-
 }
