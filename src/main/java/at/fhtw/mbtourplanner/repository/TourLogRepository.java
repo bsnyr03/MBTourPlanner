@@ -16,7 +16,10 @@ public interface TourLogRepository extends JpaRepository<TourLogEntity, Long> {
           WHERE tl.tour.id = :tourId
                AND(
                     LOWER(tl.comment) LIKE LOWER(CONCAT('%', :q, '%'))
-                    OR (tl.totalTime) = :duration
+                    OR CAST (tl.rating  AS string) LIKE CONCAT('%', :q, '%')
+                    OR CAST (tl.difficulty AS string) LIKE CONCAT('%', :q, '%')
+                    OR CAST (tl.totalDistance AS string) LIKE CONCAT('%', :q, '%')
+                    OR CAST (tl.totalTime AS string) LIKE CONCAT('%', :q, '%')
                     )
      """)
 
