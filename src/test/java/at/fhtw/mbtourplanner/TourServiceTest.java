@@ -19,11 +19,12 @@ import org.mockito.quality.Strictness;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -54,6 +55,8 @@ public class TourServiceTest {
         sampleEntity.setDistance(1000);
         sampleEntity.setEstimatedTime(Duration.ofHours(1));
         sampleEntity.setRouteImageUrl("Sample Route Image");
+        sampleEntity.setPopularity(3);
+        sampleEntity.setChildFriendliness(4);
 
 
         sampleDto = Tour.builder().name("Sample").build();
@@ -98,6 +101,70 @@ public class TourServiceTest {
         verify(tourMapper).toEntity(sampleDto);
         verify(tourRepository).save(sampleEntity);
     }
+
+    @Test
+    void getTourById_existingId_shouldReturnMappedDto() throws SQLException {
+        Long id = 1L;
+
+        when(tourRepository.findById(id)).thenReturn(Optional.of(sampleEntity));
+
+        var result = tourService.getTourById(id);
+
+        assertThat(result).isSameAs(sampleDto);
+        verify(tourRepository).findById(id);
+        verify(tourMapper).toDto(sampleEntity);
+    }
+
+    @Test
+    void getTourById_unknownId_shouldThrowException() throws SQLException {
+        Long id = 42L;
+
+        when(tourRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> tourService.getTourById(id))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Tour not found");
+
+        verify(tourRepository).findById(id);
+        verifyNoMoreInteractions(tourMapper);
+    }
+
+    @Test
+    void updateTour_existingId_shouldSaveandReturnUpdatedDto() throws SQLException {
+       TourEntity existingEntity = new TourEntity();
+
+       existingEntity.setId(2L);
+       existingEntity.setName("Old");
+
+       Tour updateDto = Tour.builder()
+               .name("New")
+               .description("New Description")
+               .fromLocation("New From")
+               .toLocation("New To")
+               .transportType("Bike")
+               .distance(2000)
+               .estimatedTime(Duration.ofHours(2))
+               .routeImageUrl("New Route Image")
+               .popularity(5)
+               .childFriendliness(4)
+               .build();
+
+       when(tourRepository.findById(2L)).thenReturn(Optional.of(existingEntity));
+       when(tourRepository.save(existingEntity)).thenReturn(existingEntity);
+       when(tourMapper.toDto(existingEntity)).thenReturn(updateDto);
+
+       var result = tourService.updateTour(2L, updateDto);
+
+       assertThat(result).isSameAs(updateDto);
+       assertThat(existingEntity.getName()).isEqualTo("New");
+       assertThat(existingEntity.getDescription()).isEqualTo("New Description");
+
+       verify(tourRepository).findById(2L);
+       verify(tourRepository).save(existingEntity);
+       verify(tourMapper).toDto(existingEntity);
+    }
+
+
 
 
 
