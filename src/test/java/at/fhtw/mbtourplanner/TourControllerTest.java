@@ -172,7 +172,6 @@ class TourControllerTest {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "tours.csv", "text/csv", csv.getBytes(StandardCharsets.UTF_8)
         );
-        // stub mapper and service
         given(tourMapper.toDto(any(TourEntity.class))).willReturn(sampleDto);
         doNothing().when(tourService).addTour(sampleDto);
 
