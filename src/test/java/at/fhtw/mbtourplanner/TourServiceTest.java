@@ -91,6 +91,14 @@ public class TourServiceTest {
         verify(tourRepository).searchTours(q);
     }
 
+    @Test
+    void addTour_shouldSaveMappedEntity() throws SQLException {
+        tourService.addTour(sampleDto);
+
+        verify(tourMapper).toEntity(sampleDto);
+        verify(tourRepository).save(sampleEntity);
+    }
+
 
 
 
