@@ -47,11 +47,6 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 	jvmArgs += [
-			// erlaubt Self-Attach
-			'-Djdk.attach.allowAttachSelf=true',
-			// unterdrückt das Hinweis-Logging
-			'-Djdk.instrument.traceUsage',
-			// in manchen JDKs nötig, um dynamische Agent-Ladung zu erlauben
 			'-XX:+EnableDynamicAgentLoading'
 	]
 }

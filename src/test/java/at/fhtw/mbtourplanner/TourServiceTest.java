@@ -164,12 +164,35 @@ public class TourServiceTest {
        verify(tourMapper).toDto(existingEntity);
     }
 
+    @Test
+    void updateTour_unknownId_shouldThrowException() throws SQLException {
+        when(tourRepository.findById(99L)).thenReturn(Optional.empty());
 
+        assertThatThrownBy(() -> tourService.updateTour(99L, sampleDto))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Tour not found");
 
+        verify(tourRepository).findById(99L);
+    }
 
+    @Test
+    void deleteTour_existingId_shouldDeleteEntity() throws SQLException {
+        when(tourRepository.findById(3L)).thenReturn(Optional.of(sampleEntity));
 
+        tourService.deleteTour(3L);
 
+        verify(tourRepository).findById(3L);
+        verify(tourRepository).delete(sampleEntity);
+    }
 
+    @Test
+    void deleteTour_unknownId_shouldThrow() {
+        when(tourRepository.findById(77L)).thenReturn(Optional.empty());
 
+        assertThatThrownBy(() -> tourService.deleteTour(77L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Tour not found");
 
+        verify(tourRepository).findById(77L);
+    }
 }
