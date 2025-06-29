@@ -162,7 +162,7 @@ class TourControllerTest {
         assertThat(resp.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
                 .isEqualTo("attachment; filename=tours.csv");
         assertThat(resp.getHeaders().getContentType().toString()).isEqualTo("text/csv");
-        assertThat(csv).contains("Sample,Desc,A,B,walk,1.5,PT0H30M,url,2,3.0");
+        assertThat(csv).contains("Sample,Desc,A,B,walk,1.5,PT30M,url,2,3.0");
     }
 
     @Test
