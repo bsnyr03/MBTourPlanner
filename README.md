@@ -90,9 +90,13 @@ Browse the Figma project: [Wireframes & Mockups](docs/mockups/)
 
 ## Unique Feature
 
-Dynamic static map image generation using OpenStreetMap, encoded polylines, and custom markers.
-
-## Time Tracking
+- **CSV Import/Export**: Allows bulk import and export of both tours and tour logs in CSV format, in addition to the standard JSON endpoints.
+    - **Export**: `GET /tours/{id}/export.csv` generates a CSV file combining tour details and its associated logs.
+    - **Import**: `POST /tours/{id}/import.csv` consumes a multipart-form CSV upload to update tour details and create multiple logs in one request.
+    - Uses Apache Commons CSV for parsing and printing.
+    - Fully covered by integration tests for both endpoints.
+    - 
+## Time Tracking Backend
 
 | Task                                 | Hours |
 |--------------------------------------|-------|
