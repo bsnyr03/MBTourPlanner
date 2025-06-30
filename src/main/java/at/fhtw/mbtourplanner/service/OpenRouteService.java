@@ -26,7 +26,9 @@ public class OpenRouteService {
         log.info("ORS request for profile={} coords={}", profile, coords);
         @SuppressWarnings("unchecked")
         Map<String,Object> resp = webClient.post()
-                .uri("/v2/directions/{profile}", profile)
+                .uri(uriBuilder -> uriBuilder
+                        .path("v2/directions/{profile}")
+                        .build(profile))
                 .bodyValue(Map.of("coordinates", coords))
                 .retrieve()
                 .bodyToMono(Map.class)
@@ -37,15 +39,15 @@ public class OpenRouteService {
             throw new RuntimeException("Empty ORS response");
         }
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> features = (List<Map<String, Object>>) resp.get("features");
-        if (features.isEmpty()) {
-            log.error("ORS returned no features for profile={} coords={}", profile, coords);
-            throw new RuntimeException("No route features");
+        Object rawRoutes = resp.get("routes");
+        if (!(rawRoutes instanceof List<?> routesList) || routesList.isEmpty()) {
+            log.error("Unexpected ORS response structure: {}", resp);
+            throw new RuntimeException("Invalid ORS response");
         }
         @SuppressWarnings("unchecked")
-        Map<String, Object> properties = (Map<String, Object>) features.get(0).get("properties");
+        Map<String, Object> route = (Map<String, Object>) routesList.get(0);
         @SuppressWarnings("unchecked")
-        Map<String, Object> summary = (Map<String, Object>) properties.get("summary");
+        Map<String, Object> summary = (Map<String, Object>) route.get("summary");
         double distance = ((Number) summary.get("distance")).doubleValue();
         double duration = ((Number) summary.get("duration")).doubleValue();
         log.info("ORS result: distance={} meters, duration={} seconds", distance, duration);

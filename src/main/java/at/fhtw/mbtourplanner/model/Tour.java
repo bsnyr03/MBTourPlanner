@@ -26,13 +26,10 @@ public class Tour {
     @NotBlank(message = "Transport type is missing")
     private String transportType;
 
-    @NotNull(message = "Distance is missing")
     private double distance;
 
-    @NotNull(message = "Estimated time is missing")
     private Duration estimatedTime;
 
-    @NotBlank(message = "Route image URL is missing")
     private String routeImageUrl;
 
     private double fromLat;
