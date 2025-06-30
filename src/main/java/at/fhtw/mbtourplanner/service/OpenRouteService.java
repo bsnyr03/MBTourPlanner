@@ -85,14 +85,8 @@ public class OpenRouteService {
             int width, int height,
             int zoom
     ) {
-        double avgLat = route.stream()
-                .mapToDouble(pt -> pt.get(0))
-                .average().orElse(0);
-        double avgLon = route.stream()
-                .mapToDouble(pt -> pt.get(1))
-                .average().orElse(0);
-
-        String encoded = PolyLineEncoder.encode(route);
+        double avgLat = route.stream().mapToDouble(p -> p.get(0)).average().orElse(0);
+        double avgLon = route.stream().mapToDouble(p -> p.get(1)).average().orElse(0);
 
         StringBuilder sb = new StringBuilder("https://staticmap.openstreetmap.de/staticmap.php");
         sb.append("?size=").append(width).append("x").append(height);
@@ -100,12 +94,13 @@ public class OpenRouteService {
         sb.append("&zoom=").append(zoom);
 
         sb.append("&markers=")
-                .append(route.get(0).get(0)).append(",")
-                .append(route.get(0).get(1)).append(",blue1|")
-                .append(route.get(route.size()-1).get(0)).append(",")
-                .append(route.get(route.size()-1).get(1)).append(",red1");
+                .append(route.get(0).get(0)).append(",").append(route.get(0).get(1)).append(",blue1|")
+                .append(route.get(route.size()-1).get(0)).append(",").append(route.get(route.size()-1).get(1)).append(",red1");
 
-        sb.append("&path=enc:").append(encoded);
+        sb.append("&path=weight:3|color:green");
+        for (List<Double> point : route) {
+            sb.append('|').append(point.get(0)).append(',').append(point.get(1));
+        }
 
         return sb.toString();
     }

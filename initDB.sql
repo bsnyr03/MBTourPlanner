@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS tours
     INTERVAL
     NOT NULL,
     route_image_url
-    TEXT,
+    VARCHAR(8192),
     from_latitude
         DOUBLE PRECISION,
     from_longitude
