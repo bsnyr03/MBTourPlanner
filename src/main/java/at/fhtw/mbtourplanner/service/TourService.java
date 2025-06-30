@@ -52,12 +52,16 @@ public class TourService {
                 List.of(entity.getToLon(),   entity.getToLat())
             )
         );
-        entity.setDistance(routeInfo.get("distance") / 1000.0);
-        entity.setEstimatedTime(Duration.ofSeconds(routeInfo.get("duration").longValue()));
+        double rawDistance = ((Number) routeInfo.get("distance")).doubleValue();
+        long rawDurationSec = ((Number) routeInfo.get("duration")).longValue();
+        entity.setDistance(rawDistance / 1000.0);
+        entity.setEstimatedTime(Duration.ofSeconds(rawDurationSec));
 
-        double midLat = (entity.getFromLat() + entity.getToLat()) / 2;
-        double midLon = (entity.getFromLon() + entity.getToLon()) / 2;
-        entity.setRouteImageUrl(openRouteService.getMapTileUrl(midLon, midLat, 14));
+        @SuppressWarnings("unchecked")
+        List<List<Double>> geometry = (List<List<Double>>) routeInfo.get("geometry");
+        entity.setRouteImageUrl(
+            openRouteService.getStaticRouteMapUrl(geometry, 600, 400, 14)
+        );
 
         tourRepository.save(entity);
         log.debug("Saved enriched tour id={} distance={} km time={}", entity.getId(), entity.getDistance(), entity.getEstimatedTime());
@@ -101,12 +105,16 @@ public class TourService {
                 List.of(existing.getToLon(),   existing.getToLat())
             )
         );
-        existing.setDistance(routeInfo.get("distance") / 1000.0);
-        existing.setEstimatedTime(Duration.ofSeconds(routeInfo.get("duration").longValue()));
+        double rawDistance = ((Number) routeInfo.get("distance")).doubleValue();
+        long rawDurationSec = ((Number) routeInfo.get("duration")).longValue();
+        existing.setDistance(rawDistance / 1000.0);
+        existing.setEstimatedTime(Duration.ofSeconds(rawDurationSec));
 
-        double midLat = (existing.getFromLat() + existing.getToLat()) / 2;
-        double midLon = (existing.getFromLon() + existing.getToLon()) / 2;
-        existing.setRouteImageUrl(openRouteService.getMapTileUrl(midLon, midLat, 14));
+        @SuppressWarnings("unchecked")
+        List<List<Double>> geometry = (List<List<Double>>) routeInfo.get("geometry");
+        existing.setRouteImageUrl(
+            openRouteService.getStaticRouteMapUrl(geometry, 600, 400, 14)
+        );
 
         var saved = tourRepository.save(existing);
         var dto = tourMapper.toDto(saved);

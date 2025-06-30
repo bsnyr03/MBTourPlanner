@@ -43,7 +43,7 @@ public class TourEntity {
     @Convert(converter = DurationToIntervalConverter.class)
     private Duration estimatedTime;
 
-    @Column(name = "route_image_url")
+    @Column(name = "route_image_url", length = 2048)
     private String routeImageUrl;
 
     @Column(name = "from_latitude")
