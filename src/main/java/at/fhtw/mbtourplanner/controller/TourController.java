@@ -35,37 +35,45 @@ public class TourController {
 
     @GetMapping
     public List<Tour> getAll() throws SQLException {
+        log.info("GET /api/tours called");
         return tourService.getAllTours();
     }
 
     @PostMapping
     public void addTour(@Valid @RequestBody Tour tour) throws SQLException {
+        log.info("POST /api/tours called with tour={}", tour);
         tourService.addTour(tour);
     }
 
     @GetMapping("/{id}")
     public Tour getTourById(@PathVariable Long id) throws SQLException {
+        log.info("GET /api/tours/{} called", id);
         return tourService.getTourById(id);
     }
 
     @PutMapping("/{id}")
     public Tour updateTour(@Valid @PathVariable Long id, @RequestBody Tour tour) throws SQLException {
+        log.info("PUT /api/tours/{} called with tour={}", id, tour);
         return tourService.updateTour(id, tour);
     }
 
     @DeleteMapping("/{id}")
     public void deleteTour(@PathVariable Long id) throws SQLException {
+        log.info("DELETE /api/tours/{} called", id);
         tourService.deleteTour(id);
     }
 
     @GetMapping("/search")
     public List<Tour> searchTours(@RequestParam String q) {
         log.info("Searching tours with query: {}", q);
-        return tourService.searchTours(q);
+        List<Tour> result = tourService.searchTours(q);
+        log.debug("Search returned {} tours for query='{}'", result.size(), q);
+        return result;
     }
 
     @GetMapping("/export")
     public ResponseEntity<List<Tour>> exportALlToursJSON() throws SQLException {
+        log.info("GET /api/tours/export (JSON) called");
         List<Tour> tours = tourService.getAllTours();
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=tours.json")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -74,6 +82,7 @@ public class TourController {
 
     @PostMapping("/import")
     public ResponseEntity<Map<String, Integer>> importAllToursJSON(@RequestBody List<Tour> tours) throws SQLException {
+        log.info("POST /api/tours/import (JSON) called with {} tours", tours.size());
         for (Tour tour : tours) {
             tourService.addTour(tour);
         }
@@ -83,6 +92,7 @@ public class TourController {
 
     @GetMapping(value = "/export/csv", produces = "text/csv")
     public ResponseEntity<byte[]> exportAllToursCSV() throws SQLException {
+        log.info("GET /api/tours/export/csv called");
         List<Tour> tours = null;
         try {
             tours = tourService.getAllTours();
@@ -120,6 +130,7 @@ public class TourController {
 
     @PostMapping(value = "/import/csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Integer>> importAllToursCSV(@RequestParam ("file") MultipartFile file) throws Exception {
+        log.info("POST /api/tours/import/csv called with file={}", file.getOriginalFilename());
         List<TourEntity> toImport = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
             reader.readNext();
