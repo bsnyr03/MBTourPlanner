@@ -16,16 +16,17 @@ import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ReportService {
     private final TourService tourService;

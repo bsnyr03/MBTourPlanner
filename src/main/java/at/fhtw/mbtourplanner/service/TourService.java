@@ -2,15 +2,12 @@ package at.fhtw.mbtourplanner.service;
 
 import at.fhtw.mbtourplanner.model.Tour;
 import at.fhtw.mbtourplanner.repository.TourEntity;
-import at.fhtw.mbtourplanner.repository.TourLogEntity;
-import at.fhtw.mbtourplanner.repository.TourLogRepository;
 import at.fhtw.mbtourplanner.repository.TourRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,7 +16,6 @@ import java.util.List;
 public class TourService {
     private final TourRepository tourRepository;
     private final TourMapper tourMapper;
-    private final TourLogRepository tourLogRepository;
 
     public List<Tour> getAllTours() throws SQLException {
         return tourMapper.toDto(tourRepository.findAll());

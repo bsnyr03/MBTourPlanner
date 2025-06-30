@@ -1,62 +1,68 @@
-package at.fhtw.mbtourplanner.controller;
-
-import at.fhtw.mbtourplanner.model.Tour;
+import at.fhtw.mbtourplanner.controller.GlobalExceptionHandler;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.springframework.core.MethodParameter;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.MockitoAnnotations.openMocks;
+import static org.slf4j.LoggerFactory.getLogger;
 
 class GlobalExceptionHandlerTest {
 
     private GlobalExceptionHandler handler;
-
-    @Mock
-    private BindingResult bindingResult;
+    private ListAppender<ILoggingEvent> listAppender;
+    private Logger log;
 
     @BeforeEach
     void setUp() {
-        openMocks(this);
+        log = (Logger) getLogger(GlobalExceptionHandler.class);
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        log.addAppender(listAppender);
+
         handler = new GlobalExceptionHandler();
     }
 
     @Test
-    void handleValidationErrors_returnsBadRequestWithFieldErrors() throws NoSuchMethodException {
-        FieldError fe1 = new FieldError("tour", "name", "Name is required");
-        FieldError fe2 = new FieldError("tour", "distance", "Distance must be positive");
-        given(bindingResult.getFieldErrors()).willReturn(List.of(fe1, fe2));
+    void handleValidationErrors_logsWarningAndReturnsMap() {
+        BeanPropertyBindingResult br = new BeanPropertyBindingResult(new Object(), "obj");
+        br.addError(new FieldError("obj", "name", "must not be blank"));
 
-        Method targetMethod = TourController.class.getMethod("addTour", Tour.class);
-        MethodParameter methodParam = new MethodParameter(targetMethod, 0);
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(null, br);
+        var response = handler.handleValidationErrors(ex);
 
-        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(methodParam, bindingResult);
+        // Überprüfe Log-Eintrag
+        boolean found = listAppender.list.stream().anyMatch(event ->
+                event.getLevel() == Level.WARN &&
+                        event.getFormattedMessage().contains("Validation error occurred")
+        );
+        assertThat(found).isTrue();
 
-        ResponseEntity<Map<String, String>> resp = handler.handleValidationErrors(ex);
-
-        assertThat(resp.getStatusCodeValue()).isEqualTo(400);
-        Map<String, String> body = resp.getBody();
-        assertThat(body).containsEntry("name", "Name is required");
-        assertThat(body).containsEntry("distance", "Distance must be positive");
+        Map<String,String> body = response.getBody();
+        assertThat(body).containsEntry("name", "must not be blank");
+        assertThat(response.getStatusCodeValue()).isEqualTo(400);
     }
 
     @Test
-    void handleNotFound_returnsNotFoundWithErrorMessage() {
-        RuntimeException rex = new RuntimeException("Resource not found");
+    void handleNotFound_logsErrorAndReturns404() {
+        RuntimeException notFound = new RuntimeException("not found");
+        var response = handler.handleNotFound(notFound);
 
-        ResponseEntity<Map<String, String>> resp = handler.handleNotFound(rex);
+        boolean found = listAppender.list.stream().anyMatch(event ->
+                event.getLevel() == Level.ERROR &&
+                        event.getFormattedMessage().contains("Unhandled runtime exception")
+        );
+        assertThat(found).isTrue();
 
-        assertThat(resp.getStatusCodeValue()).isEqualTo(404);
-        assertThat(resp.getBody()).containsEntry("error", "Resource not found");
+        Map<String,String> body = response.getBody();
+        assertThat(body).containsEntry("error", "not found");
+        assertThat(response.getStatusCodeValue()).isEqualTo(404);
     }
 }
