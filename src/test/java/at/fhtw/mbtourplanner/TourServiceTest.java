@@ -1,6 +1,8 @@
 package at.fhtw.mbtourplanner;
+
 import at.fhtw.mbtourplanner.service.GeocodingService;
 import at.fhtw.mbtourplanner.service.OpenRouteService;
+
 import java.util.Map;
 
 
@@ -36,11 +38,15 @@ public class TourServiceTest {
     @Mock
     private TourRepository tourRepository;
 
-    @Mock private TourLogRepository tourLogRepository;
+    @Mock
+    private TourLogRepository tourLogRepository;
 
-    @Mock private TourMapper tourMapper;
-    @Mock private GeocodingService geocodingService;
-    @Mock private OpenRouteService openRouteService;
+    @Mock
+    private TourMapper tourMapper;
+    @Mock
+    private GeocodingService geocodingService;
+    @Mock
+    private OpenRouteService openRouteService;
 
     @InjectMocks
     private TourService tourService;
@@ -53,7 +59,7 @@ public class TourServiceTest {
         // default geocoding and routing stubs
         when(geocodingService.geocode(anyString())).thenReturn(new double[]{0.0, 0.0});
         when(openRouteService.getRouteInfo(anyString(), anyList()))
-            .thenReturn(Map.of("distance", 0.0, "duration", 0.0));
+                .thenReturn(Map.of("distance", 0.0, "duration", 0.0));
 
         sampleEntity = new TourEntity();
         sampleEntity.setId(1L);
@@ -106,6 +112,21 @@ public class TourServiceTest {
 
     @Test
     void addTour_shouldSaveMappedEntity() throws SQLException {
+        Map<String, Object> summary = Map.of(
+                "distance", 1000.0,
+                "duration", 3600.0
+        );
+        Map<String, Object> properties = Map.of("summary", summary);
+        Map<String, Object> geometry = Map.of("coordinates", List.of(List.of(0.0, 0.0), List.of(1.0, 1.0)));
+        Map<String, Object> feature = Map.of(
+                "properties", properties,
+                "geometry", geometry
+        );
+        Map<String, Object> routeInfo = Map.of("features", List.of(feature));
+
+        when(openRouteService.getRouteInfo(anyString(), anyList())).thenReturn(routeInfo);
+
+
         tourService.addTour(sampleDto);
 
         verify(tourMapper).toEntity(sampleDto);
@@ -141,37 +162,52 @@ public class TourServiceTest {
 
     @Test
     void updateTour_existingId_shouldSaveandReturnUpdatedDto() throws SQLException {
-       TourEntity existingEntity = new TourEntity();
+        TourEntity existingEntity = new TourEntity();
+        existingEntity.setId(2L);
+        existingEntity.setName("Old");
 
-       existingEntity.setId(2L);
-       existingEntity.setName("Old");
+        Tour updateDto = Tour.builder()
+                .name("New")
+                .description("New Description")
+                .fromLocation("New From")
+                .toLocation("New To")
+                .transportType("Bike")
+                .distance(2000)
+                .estimatedTime(Duration.ofHours(2))
+                .routeImageUrl("New Route Image")
+                .popularity(5)
+                .childFriendliness(4)
+                .build();
 
-       Tour updateDto = Tour.builder()
-               .name("New")
-               .description("New Description")
-               .fromLocation("New From")
-               .toLocation("New To")
-               .transportType("Bike")
-               .distance(2000)
-               .estimatedTime(Duration.ofHours(2))
-               .routeImageUrl("New Route Image")
-               .popularity(5)
-               .childFriendliness(4)
-               .build();
+        when(geocodingService.geocode(anyString())).thenReturn(new double[]{0.0, 0.0});
 
-       when(tourRepository.findById(2L)).thenReturn(Optional.of(existingEntity));
-       when(tourRepository.save(existingEntity)).thenReturn(existingEntity);
-       when(tourMapper.toDto(existingEntity)).thenReturn(updateDto);
+        Map<String, Object> summary = Map.of(
+                "distance", 1000.0,
+                "duration", 3600.0
+        );
+        Map<String, Object> properties = Map.of("summary", summary);
+        Map<String, Object> geometry = Map.of("coordinates", List.of(List.of(0.0, 0.0), List.of(1.0, 1.0)));
+        Map<String, Object> feature = Map.of(
+                "properties", properties,
+                "geometry", geometry
+        );
+        Map<String, Object> routeInfo = Map.of("features", List.of(feature));
+        when(openRouteService.getRouteInfo(anyString(), anyList())).thenReturn(routeInfo);
+        when(openRouteService.getStaticRouteMapUrl(anyList(), anyInt(), anyInt(), anyInt())).thenReturn("mockedUrl");
 
-       var result = tourService.updateTour(2L, updateDto);
+        when(tourRepository.findById(2L)).thenReturn(Optional.of(existingEntity));
+        when(tourRepository.save(existingEntity)).thenReturn(existingEntity);
+        when(tourMapper.toDto(existingEntity)).thenReturn(updateDto);
 
-       assertThat(result).isSameAs(updateDto);
-       assertThat(existingEntity.getName()).isEqualTo("New");
-       assertThat(existingEntity.getDescription()).isEqualTo("New Description");
+        var result = tourService.updateTour(2L, updateDto);
 
-       verify(tourRepository).findById(2L);
-       verify(tourRepository).save(existingEntity);
-       verify(tourMapper).toDto(existingEntity);
+        assertThat(result).isSameAs(updateDto);
+        assertThat(existingEntity.getName()).isEqualTo("New");
+        assertThat(existingEntity.getDescription()).isEqualTo("New Description");
+
+        verify(tourRepository).findById(2L);
+        verify(tourRepository).save(existingEntity);
+        verify(tourMapper).toDto(existingEntity);
     }
 
     @Test
