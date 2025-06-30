@@ -46,6 +46,18 @@ public class TourEntity {
     @Column(name = "route_image_url")
     private String routeImageUrl;
 
+    @Column(name = "from_latitude")
+    private double fromLat;
+
+    @Column(name = "from_longitude")
+    private double fromLon;
+
+    @Column(name = "to_latitude")
+    private double toLat;
+
+    @Column(name = "to_longitude")
+    private double toLon;
+
     @Column(name = "popularity")
     private int popularity;
 

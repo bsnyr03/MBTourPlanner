@@ -1,4 +1,7 @@
 package at.fhtw.mbtourplanner;
+import at.fhtw.mbtourplanner.service.GeocodingService;
+import at.fhtw.mbtourplanner.service.OpenRouteService;
+import java.util.Map;
 
 
 import at.fhtw.mbtourplanner.model.Tour;
@@ -36,6 +39,8 @@ public class TourServiceTest {
     @Mock private TourLogRepository tourLogRepository;
 
     @Mock private TourMapper tourMapper;
+    @Mock private GeocodingService geocodingService;
+    @Mock private OpenRouteService openRouteService;
 
     @InjectMocks
     private TourService tourService;
@@ -45,6 +50,11 @@ public class TourServiceTest {
 
     @BeforeEach
     void setUp() throws SQLException {
+        // default geocoding and routing stubs
+        when(geocodingService.geocode(anyString())).thenReturn(new double[]{0.0, 0.0});
+        when(openRouteService.getRouteInfo(anyString(), anyList()))
+            .thenReturn(Map.of("distance", 0.0, "duration", 0.0));
+
         sampleEntity = new TourEntity();
         sampleEntity.setId(1L);
         sampleEntity.setName("Sample Name");

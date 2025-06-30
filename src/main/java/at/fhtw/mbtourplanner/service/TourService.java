@@ -1,13 +1,13 @@
 package at.fhtw.mbtourplanner.service;
 
 import at.fhtw.mbtourplanner.model.Tour;
-import at.fhtw.mbtourplanner.repository.TourEntity;
 import at.fhtw.mbtourplanner.repository.TourRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -16,6 +16,8 @@ import java.util.List;
 public class TourService {
     private final TourRepository tourRepository;
     private final TourMapper tourMapper;
+    private final GeocodingService geocodingService;
+    private final OpenRouteService openRouteService;
 
     public List<Tour> getAllTours() throws SQLException {
         log.info("Fetching all tours");
@@ -35,8 +37,30 @@ public class TourService {
     public void addTour(Tour tour) throws SQLException {
         log.info("Adding new tour: {}", tour.getName());
         var entity = tourMapper.toEntity(tour);
+
+        double[] from = geocodingService.geocode(entity.getFromLocation());
+        double[] to   = geocodingService.geocode(entity.getToLocation());
+        entity.setFromLat(from[0]);
+        entity.setFromLon(from[1]);
+        entity.setToLat(to[0]);
+        entity.setToLon(to[1]);
+
+        var routeInfo = openRouteService.getRouteInfo(
+            "foot-walking",
+            List.of(
+                List.of(entity.getFromLon(), entity.getFromLat()),
+                List.of(entity.getToLon(),   entity.getToLat())
+            )
+        );
+        entity.setDistance(routeInfo.get("distance") / 1000.0);
+        entity.setEstimatedTime(Duration.ofSeconds(routeInfo.get("duration").longValue()));
+
+        double midLat = (entity.getFromLat() + entity.getToLat()) / 2;
+        double midLon = (entity.getFromLon() + entity.getToLon()) / 2;
+        entity.setRouteImageUrl(openRouteService.getMapTileUrl(midLon, midLat, 14));
+
         tourRepository.save(entity);
-        log.debug("Saved tour with id={}", entity.getId());
+        log.debug("Saved enriched tour id={} distance={} km time={}", entity.getId(), entity.getDistance(), entity.getEstimatedTime());
     }
 
     public Tour getTourById(Long id) throws SQLException {
@@ -62,6 +86,28 @@ public class TourService {
         existing.setRouteImageUrl(tour.getRouteImageUrl());
         existing.setPopularity(tour.getPopularity());
         existing.setChildFriendliness(tour.getChildFriendliness());
+
+        double[] from = geocodingService.geocode(existing.getFromLocation());
+        double[] to   = geocodingService.geocode(existing.getToLocation());
+        existing.setFromLat(from[0]);
+        existing.setFromLon(from[1]);
+        existing.setToLat(to[0]);
+        existing.setToLon(to[1]);
+
+        var routeInfo = openRouteService.getRouteInfo(
+            "foot-walking",
+            List.of(
+                List.of(existing.getFromLon(), existing.getFromLat()),
+                List.of(existing.getToLon(),   existing.getToLat())
+            )
+        );
+        existing.setDistance(routeInfo.get("distance") / 1000.0);
+        existing.setEstimatedTime(Duration.ofSeconds(routeInfo.get("duration").longValue()));
+
+        double midLat = (existing.getFromLat() + existing.getToLat()) / 2;
+        double midLon = (existing.getFromLon() + existing.getToLon()) / 2;
+        existing.setRouteImageUrl(openRouteService.getMapTileUrl(midLon, midLat, 14));
+
         var saved = tourRepository.save(existing);
         var dto = tourMapper.toDto(saved);
         log.debug("Updated tour: {}", dto);

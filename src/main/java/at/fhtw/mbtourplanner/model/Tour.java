@@ -35,6 +35,11 @@ public class Tour {
     @NotBlank(message = "Route image URL is missing")
     private String routeImageUrl;
 
+    private double fromLat;
+    private double fromLon;
+    private double toLat;
+    private double toLon;
+
     @NotNull(message = "popularity is missing")
     private int popularity;
 
