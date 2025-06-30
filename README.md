@@ -64,4 +64,5 @@
   - Documentation & diagrams: 4h  
 
 ## Git Repository
-- [GitHub - username/MBTourPlanner](https://github.com/username/MBTourPlanner)
+- [GitHub - bsnyr03/MBTourPlanner](https://github.com/bsnyr03/MBTourPlanner)
+- [Github - bsnyr03/MBTourPlannerFrontend](https://github.com/bsnyr03/MBTourPlannerFrontend)
