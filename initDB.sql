@@ -34,6 +34,14 @@ CREATE TABLE IF NOT EXISTS tours
     NOT NULL,
     route_image_url
     TEXT,
+    from_latitude
+        DOUBLE PRECISION,
+    from_longitude
+        DOUBLE PRECISION,
+    to_latitude
+        DOUBLE PRECISION,
+    to_longitude
+        DOUBLE PRECISION,
     popularity
     INTEGER,
     child_friendliness
@@ -83,6 +91,10 @@ CREATE TABLE IF NOT EXISTS tour_logs
     distance,
     estimated_time,
     route_image_url,
+    from_latitude,
+    from_longitude,
+    to_latitude,
+    to_longitude,
     popularity,
     child_friendliness
 )
@@ -96,8 +108,12 @@ CREATE TABLE IF NOT EXISTS tour_logs
     6.0,
     INTERVAL '1 hour 30 minutes',
     '',
+    52.516275,
+    13.377704,
+    52.521918,
+    13.413215,
     0,
-    0
+    0.0
 ),
 (
     'Vienna Sightseeing Tour',
@@ -108,6 +124,10 @@ CREATE TABLE IF NOT EXISTS tour_logs
     5.5,
     INTERVAL '2 hours',
     '',
+    48.208176,
+    16.373819,
+    48.184355,
+    16.312150,
     0,
     0.0
 ),
@@ -120,6 +140,10 @@ CREATE TABLE IF NOT EXISTS tour_logs
     4.0,
     INTERVAL'1 hour',
     '',
+    48.137154,
+    11.575490,
+    48.156881,
+    11.600603,
     0,
     0
 );
