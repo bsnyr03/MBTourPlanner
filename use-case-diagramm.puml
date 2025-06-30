@@ -2,6 +2,10 @@
 
 actor User
 
+package "Home" {
+  (View Home with Shortcuts)
+}
+
 package "Tour Management" {
   (Create Tour)
   (View Tours)
@@ -24,8 +28,10 @@ package "Search & Analysis" {
 }
 
 package "Data Import/Export" {
-  (Import Tours)
-  (Export Tours)
+  (Import Tours as PDF)
+  (Import Tours as CSV)
+  (Export Tours as CSV)
+  (Export Tours as PDF)
 }
 
 package "Reporting" {
@@ -48,8 +54,10 @@ User --> (Update TourLog)
 User --> (Delete TourLog)
 
 User --> (Search Tours & Logs)
-User --> (Import Tours)
-User --> (Export Tours)
+User --> (Import Tours as PDF)
+User --> (Export Tours as PDF)
+User --> (Import Tours as CSV)
+User --> (Export Tours as CSV)
 
 User --> (Generate Tour Report)
 User --> (Generate Summary Report)
