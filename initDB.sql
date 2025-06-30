@@ -88,44 +88,46 @@ CREATE TABLE IF NOT EXISTS tour_logs
 )
     VALUES
 (
-    'City Highlights',
-    'A guided bike tour through the historic city center.',
-    'Old Town',
-    'City Park',
+    'Berlin City Tour',
+    'Cycle from Brandenburg Gate to Alexanderplatz through central Berlin.',
+    'Pariser Platz, Berlin, Germany',
+    'Alexanderplatz, Berlin, Germany',
     'bike',
-    12.5,
-    INTERVAL '2 hours',
-    'https://example.com/city-tour.png',
-    1,
+    6.0,
+    INTERVAL '1 hour 30 minutes',
+    '',
+    0,
     0
 ),
 (
-    'Mountain Hike',
-    'A challenging hike up the local mountain trail.',
-    'Trailhead',
-    'Summit',
-    'hike',
-    8.0,
-    INTERVAL '4 hours',
-    'https://example.com/mountain-hike.png',
-    1,
-    0
-),
-(
-    'Beach Vacation',
-    'A relaxing walk along the coastal boardwalk.',
-    'Pier',
-    'Lighthouse',
+    'Vienna Sightseeing Tour',
+    'Walk from St. Stephen''s Cathedral to Schönbrunn Palace via the Ringstrasse.',
+    'Stephansplatz 3, 1010 Wien, Austria',
+    'Schönbrunner Schlossstraße 47, 1130 Wien, Austria',
     'walk',
-    5.0,
-    INTERVAL'2 hours',
-    'https://example.com/beach-vacation.png',
-    1,
+    5.5,
+    INTERVAL '2 hours',
+    '',
+    0,
+    0.0
+),
+(
+    'Munich Old Town to English Garden',
+    'Stroll from Marienplatz to the Chinese Tower in the English Garden.',
+    'Marienplatz, 80331 München, Germany',
+    'Englischer Garten 1, 80538 München, Germany',
+    'walk',
+    4.0,
+    INTERVAL'1 hour',
+    '',
+    0,
     0
 );
 
-
+/*
 INSERT INTO tour_logs (tour_id, log_datetime, comment, difficulty, total_distance, total_time, rating)
 VALUES (1, '2023-10-01 10:00:00', 'Great tour, very informative!', 2, 12.5, INTERVAL '2 hours', 5),
        (2, '2023-10-02 09:30:00', 'Challenging but worth it for the views.', 4, 8.0, INTERVAL '4 hours', 4),
        (3, '2023-10-03 11:00:00', 'Relaxing and beautiful scenery.', 1, 5.0, INTERVAL '2 hours', 5);
+
+ */
