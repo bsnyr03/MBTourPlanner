@@ -1,7 +1,6 @@
 package at.fhtw.mbtourplanner.service;
 
-
-import at.fhtw.mbtourplanner.model.Tour;
+import lombok.extern.slf4j.Slf4j;
 import at.fhtw.mbtourplanner.model.TourLog;
 import at.fhtw.mbtourplanner.repository.TourEntity;
 import at.fhtw.mbtourplanner.repository.TourLogEntity;
@@ -16,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TourLogService {
 
     private final TourLogRepository tourLogRepository;
@@ -23,20 +23,26 @@ public class TourLogService {
     private final TourLogMapper mapper;
 
     public List<TourLog> getLogsForTour(Long tourId) throws SQLException {
+        log.info("Fetching all logs for tourId={}", tourId);
         TourEntity tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new RuntimeException("Tour not found"));
         List<TourLogEntity> ents = tourLogRepository.findAllByTour(tour);
+        log.debug("Found {} TourLogEntity entries for tourId={}", ents.size(), tourId);
         ents.forEach(e -> e.setTour(tour));
         return mapper.toDto(ents);
     }
 
     public List<TourLog> searchLogs(Long tourId, String q) throws SQLException {
+        log.info("Searching logs for tourId={} with query='{}'", tourId, q);
         List<TourLogEntity> ents = tourLogRepository.searchLogs(tourId, q);
+        log.debug("Search returned {} entries for tourId={} and query='{}'", ents.size(), tourId, q);
         return mapper.toDto(ents);
     }
 
     public TourLog getLog(Long tourId, Long logId) throws SQLException{
+        log.info("Fetching TourLog with id={} for tourId={}", logId, tourId);
         TourLogEntity tourLogEntity = tourLogRepository.findById(logId).orElseThrow(() -> new RuntimeException("TourLog not found"));
+        log.debug("Fetched TourLogEntity: {}", tourLogEntity);
         if(!tourLogEntity.getTour().getId().equals(tourId)) {
             throw new RuntimeException("TourLog does not belong to the specified Tour");
         }
@@ -44,10 +50,12 @@ public class TourLogService {
     }
 
     public TourLog addLog(Long tourId, TourLog tourLog) throws SQLException {
+        log.info("Adding TourLog for tourId={} with data={}", tourId, tourLog);
         TourEntity tour = tourRepository.findById(tourId).orElseThrow(() -> new RuntimeException("Tour not found"));
         TourLogEntity tourLogEntity = mapper.toEntity(tourLog);
         tourLogEntity.setTour(tour);
         tourLogRepository.save(tourLogEntity);
+        log.debug("Saved TourLogEntity with id={} for tourId={}", tourLogEntity.getId(), tourId);
 
         validateTourLog(tourLogEntity);
         updateTourStats(tour, tourId);
@@ -56,6 +64,7 @@ public class TourLogService {
     }
 
     public TourLog updateLog(Long tourId, Long logId, TourLog dto) throws SQLException {
+        log.info("Updating TourLog id={} for tourId={} with data={}", logId, tourId, dto);
         TourEntity tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new RuntimeException("Tour not found"));
         TourLogEntity existing = tourLogRepository.findById(logId)
@@ -69,6 +78,7 @@ public class TourLogService {
         existing.setTotalTime(dto.getTotalTime());
         existing.setRating(dto.getRating());
         TourLogEntity saved = tourLogRepository.save(existing);
+        log.debug("Updated TourLogEntity: {}", saved);
 
         validateTourLog(existing);
         updateTourStats(tour, tourId);
@@ -77,6 +87,7 @@ public class TourLogService {
     }
 
     public void deleteLog(Long tourId, Long logId) throws SQLException {
+        log.info("Deleting TourLog id={} for tourId={}", logId, tourId);
         TourEntity tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new RuntimeException("Tour not found"));
         TourLogEntity tourLogEntity = tourLogRepository.findById(logId).orElseThrow(() -> new RuntimeException("TourLog not found"));
@@ -87,12 +98,14 @@ public class TourLogService {
         updateTourStats(tour, tourId);
 
         tourLogRepository.delete(tourLogEntity);
+        log.debug("Deleted TourLogEntity id={} for tourId={}", logId, tourId);
     }
 
     public void updateTourStats(TourEntity tour, Long tourId) throws SQLException {
-
+        log.info("Updating stats for tourId={}", tourId);
         int popularity = tourLogRepository.countByTourId(tour.getId());
         double childFriendliness = computeChildFriendliness(tour);
+        log.debug("Computed stats popularity={} and childFriendliness={} for tourId={}", popularity, childFriendliness, tourId);
         tour.setPopularity(popularity);
         tour.setChildFriendliness(childFriendliness);
         tourRepository.save(tour);

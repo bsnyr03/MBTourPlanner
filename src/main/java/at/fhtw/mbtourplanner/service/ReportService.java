@@ -33,6 +33,7 @@ public class ReportService {
     private final TourLogService tourLogService;
 
     public byte[] generateTourReportPDF(Long tourId) throws Exception {
+        log.info("Starting generation of tour report PDF for tourId={}", tourId);
         Tour tour = tourService.getTourById(tourId);
 
         if(tour == null) {
@@ -40,6 +41,7 @@ public class ReportService {
         }
 
         List<TourLog> tourlogs = tourLogService.getLogsForTour(tourId);
+        log.debug("Fetched tour: {} with {} logs", tour, tourlogs.size());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
@@ -155,12 +157,15 @@ public class ReportService {
         }
 
         document.add(table);
+        log.info("Generated tour report PDF for tourId={} ({} bytes)", tourId, outputStream.size());
         document.close();
         return outputStream.toByteArray();
     }
 
     public byte[] generateSummaryReportPDF() throws Exception {
+        log.info("Starting generation of summary report PDF");
         List<Tour> tours = tourService.getAllTours();
+        log.debug("Fetched {} tours for summary report", tours.size());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
@@ -209,6 +214,7 @@ public class ReportService {
         }
 
         document.add(table);
+        log.info("Generated summary report PDF ({} bytes)", outputStream.size());
         document.close();
         return outputStream.toByteArray();
     }
