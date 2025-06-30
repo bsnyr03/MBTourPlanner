@@ -63,4 +63,9 @@ public class TourEntity {
 
     @Column(name = "child_friendliness")
     private double childFriendliness;
+
+    @Lob
+    @Column(name = "route_image_data")
+    private byte[] routeImageData;
+
 }

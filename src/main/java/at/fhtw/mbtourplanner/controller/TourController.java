@@ -163,9 +163,33 @@ public class TourController {
         return ResponseEntity.ok(Map.of("imported", toImport.size(), "status", HttpStatus.OK.value()));
     }
 
+    @PostMapping("/{id}/image")
+    public ResponseEntity<Void> uploadRouteImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        log.info("POST /api/tours/{}/image called with file={}", id, file.getOriginalFilename());
+        try {
+            tourService.storeRouteImage(id, file);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Error uploading image for tour {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
-
-
-
+    @GetMapping("/{id}/image")
+    public ResponseEntity<byte[]> getRouteImage(@PathVariable Long id) {
+        log.info("GET /api/tours/{}/image called", id);
+        try {
+            byte[] imageData = tourService.getRouteImage(id);
+            if (imageData == null || imageData.length == 0) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(imageData);
+        } catch (Exception e) {
+            log.error("Error retrieving image for tour {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }

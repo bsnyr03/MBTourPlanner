@@ -1,11 +1,15 @@
 package at.fhtw.mbtourplanner.service;
 
 import at.fhtw.mbtourplanner.model.Tour;
+import at.fhtw.mbtourplanner.repository.TourEntity;
 import at.fhtw.mbtourplanner.repository.TourRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
@@ -149,4 +153,27 @@ public class TourService {
         tourRepository.delete(entity);
         log.debug("Deleted tour with id={}", id);
     }
+
+    @Transactional
+    public void storeRouteImage(Long tourId, MultipartFile file) {
+        TourEntity ent = tourRepository.findById(tourId)
+                .orElseThrow(() -> new RuntimeException("Tour not found"));
+        try {
+            ent.setRouteImageData(file.getBytes());
+            tourRepository.save(ent);
+        } catch (IOException e) {
+            throw new RuntimeException("Image storage failed", e);
+        }
+    }
+
+    public byte[] getRouteImage(Long tourId) {
+        TourEntity ent = tourRepository.findById(tourId)
+                .orElseThrow(() -> new RuntimeException("Tour not found"));
+        byte[] imageData = ent.getRouteImageData();
+        if (imageData == null || imageData.length == 0) {
+            throw new RuntimeException("No image data found for tour");
+        }
+        return imageData;
+    }
+
 }

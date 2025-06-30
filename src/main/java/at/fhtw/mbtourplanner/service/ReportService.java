@@ -2,6 +2,8 @@ package at.fhtw.mbtourplanner.service;
 
 import at.fhtw.mbtourplanner.model.Tour;
 import at.fhtw.mbtourplanner.model.TourLog;
+import at.fhtw.mbtourplanner.repository.TourRepository;
+import at.fhtw.mbtourplanner.repository.TourEntity;
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -37,6 +39,7 @@ import java.util.List;
 public class ReportService {
     private final TourService tourService;
     private final TourLogService tourLogService;
+    private final TourRepository tourRepository;
 
     public byte[] generateTourReportPDF(Long tourId) throws Exception {
         log.info("Starting generation of tour report PDF for tourId={}", tourId);
@@ -110,25 +113,12 @@ public class ReportService {
         document.add(detailsTable);
         document.add(new Paragraph("\n"));
 
-        String mapUrl = tour.getRouteImageUrl();
-        try {
-            HttpClient httpClient = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(mapUrl))
-                    .build();
-            HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            if (response.statusCode() == 200) {
-                byte[] imageBytes = response.body();
-                ImageData mapData = ImageDataFactory.create(imageBytes);
-                Image mapImage = new Image(mapData);
-                mapImage.setAutoScale(true);
-                document.add(mapImage);
-            } else {
-                throw new IOException("Non-OK HTTP status: " + response.statusCode());
-            }
-        } catch (Exception e) {
-            log.error("Map image for tour {} could not be loaded", tour.getId(), e);
-            document.add(new Paragraph("Route Map: " + mapUrl));
+        TourEntity entity = tourRepository.findById(tourId)
+            .orElseThrow(() -> new SQLException("Tour not found with ID: " + tourId));
+        byte[] imgData = entity.getRouteImageData();
+        if (imgData != null) {
+            ImageData img = ImageDataFactory.create(imgData);
+            document.add(new Image(img));
         }
 
         document.add(new Paragraph("\n"));

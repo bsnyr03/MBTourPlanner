@@ -45,7 +45,9 @@ CREATE TABLE IF NOT EXISTS tours
     popularity
     INTEGER,
     child_friendliness
-    DOUBLE PRECISION
+    DOUBLE PRECISION,
+    route_image_data
+    BYTEA
 );
 
 CREATE TABLE IF NOT EXISTS tour_logs
