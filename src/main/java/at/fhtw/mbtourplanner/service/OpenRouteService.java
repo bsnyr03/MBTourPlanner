@@ -64,7 +64,7 @@ public class OpenRouteService {
         String rawPolyline = PolyLineEncoder.encode(route);
         String encodedPolyline = URLEncoder.encode(rawPolyline, StandardCharsets.UTF_8);
 
-        StringBuilder sb = new StringBuilder("https://staticmap.openstreetmap.de/staticmap.php");
+        StringBuilder sb = new StringBuilder("https://openstreetmap.de");
         sb.append("?size=").append(width).append("x").append(height);
         sb.append("&center=").append(avgLat).append(",").append(avgLon);
         sb.append("&zoom=").append(zoom);
@@ -85,24 +85,11 @@ public class OpenRouteService {
             int width, int height,
             int zoom
     ) {
-        double avgLat = route.stream().mapToDouble(p -> p.get(0)).average().orElse(0);
-        double avgLon = route.stream().mapToDouble(p -> p.get(1)).average().orElse(0);
-
-        StringBuilder sb = new StringBuilder("https://staticmap.openstreetmap.de/staticmap.php");
-        sb.append("?size=").append(width).append("x").append(height);
-        sb.append("&center=").append(avgLat).append(",").append(avgLon);
-        sb.append("&zoom=").append(zoom);
-
-        sb.append("&markers=")
-                .append(route.get(0).get(0)).append(",").append(route.get(0).get(1)).append(",blue1|")
-                .append(route.get(route.size()-1).get(0)).append(",").append(route.get(route.size()-1).get(1)).append(",red1");
-
-        sb.append("&path=weight:3|color:green");
-        for (List<Double> point : route) {
-            sb.append('|').append(point.get(0)).append(',').append(point.get(1));
-        }
-
-        return sb.toString();
+        List<Double> start = route.get(0);
+        List<Double> end = route.get(route.size() - 1);
+        String routeParam = start.get(0) + "," + start.get(1) + ";" + end.get(0) + "," + end.get(1);
+        String encodedParam = URLEncoder.encode(routeParam, StandardCharsets.UTF_8);
+        return "https://www.openstreetmap.org/directions?engine=fossgis_osrm_foot&route=" + encodedParam;
     }
 
 
