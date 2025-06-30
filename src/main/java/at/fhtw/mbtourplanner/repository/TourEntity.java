@@ -17,7 +17,7 @@ import java.time.Duration;
 @Table(name = "tours")
 public class TourEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name="name", nullable = false)
