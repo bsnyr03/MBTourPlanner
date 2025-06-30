@@ -1,68 +1,112 @@
-# MBTourPlanner
+# MB Tour Planner
+
+## Table of Contents
+
+1. [Description](#description)  
+2. [Architecture](#architecture)  
+   - [Layers](#layers)  
+   - [Class Diagrams](#class-diagrams)  
+3. [Use Cases](#use-cases)  
+4. [Mockups & Wireframes](#mockups--wireframes)  
+5. [Library Decisions](#library-decisions)  
+6. [Lessons Learned](#lessons-learned)  
+7. [Design Patterns](#design-patterns)  
+8. [Unit Testing](#unit-testing)  
+9. [Unique Feature](#unique-feature)  
+10. [Time Tracking](#time-tracking)  
+11. [Git Repositories](#git-repositories)
+
+---
 
 ## Description
+
+MB Tour Planner is a Spring Boot REST API for creating, managing, and reporting custom tours. Features include CRUD operations for tours and logs, full-text search, import/export (JSON, CSV), PDF reporting, and dynamic static map generation via OpenRouteService and OpenStreetMap.
 
 ## Architecture
 
 ### Layers
-- **Controller Layer**: Handles HTTP requests, input validation, and delegates to service layer.
-- **Service Layer**: Contains business logic, route retrieval from OpenRouteService, calculations (popularity, childFriendliness), and static map URL generation.
-- **Repository Layer**: JPA repositories for `TourEntity` and `TourLogEntity`, custom search queries.
-- **Converter Layer**: JPA attribute converters for `Duration` ↔ SQL `INTERVAL`.
-- **Mapper Layer**: AbstractMapper and concrete mappers converting between Entity and DTO.
+
+- **Controller Layer**  
+  Handles HTTP endpoints, request validation, and delegates to services.
+
+- **Service Layer**  
+  Implements business logic, computes metrics (popularity, child friendliness), integrates with OpenRouteService, and builds static map URLs.
+
+- **Repository Layer**  
+  Spring Data JPA repositories for `TourEntity` and `TourLogEntity` with custom queries for search.
+
+- **Mapper Layer**  
+  `AbstractMapper` + concrete mappers to convert between entities and DTOs.
+
+- **Converter Layer**  
+  JPA `AttributeConverter` for converting `java.time.Duration` ↔ SQL `INTERVAL`.
 
 ### Class Diagrams
-(See `class-diagram.puml`)
+
+See [class-diagram.puml](docs/class-diagram.puml) for a visual overview of key classes and relationships.
 
 ## Use Cases
 
-### Use-Case Diagram
-(See `use-case-diagram.puml`)
+![Use Case Diagram](docs/use-case-diagram.png)
 
-### Mookup
-(See `mookup/...`)
+- **Manage Tours**: Create, read, update, delete tours.
+- **Manage Tour Logs**: Add, view, update, delete logs tied to tours.
+- **Search**: Full-text search across tours and logs.
+- **Import/Export**: Bulk data import/export via JSON and CSV.
+- **Reporting**: Generate detailed and summary PDF reports.
+
+## Mockups & Wireframes
+
+Browse the Figma project: [Wireframes & Mockups](docs/mockups/)
 
 ## Library Decisions
-- **Spring Boot** for rapid REST API development.
-- **Spring Data JPA** for ORM.
-- **OpenRouteService Java client / WebClient** for external routing.
-- **iText 7** for PDF report generation.
-- **OpenCSV** for CSV import/export.
-- **JUnit 5 + Mockito** for unit testing.
-- **Lombok** to reduce boilerplate.
+
+- **Spring Boot**: Simplify REST API development.  
+- **Spring Data JPA**: ORM and repository abstractions.  
+- **WebClient**: Non-blocking calls to OpenRouteService.  
+- **iText 7**: PDF generation.  
+- **OpenCSV**: CSV import/export.  
+- **JUnit 5 & Mockito**: Unit and integration testing.  
+- **Lombok**: Boilerplate reduction.
 
 ## Lessons Learned
-- Converting `java.time.Duration` to SQL `INTERVAL` required a custom `AttributeConverter`.
-- Integrating with ORS API and static map URL construction.
-- Exception handling with `@ControllerAdvice`.
-- Importance of unidirectional mapping via AbstractMapper.
+
+- Handling `Duration` ↔ `INTERVAL` mapping with a custom converter.  
+- Error handling with `@ControllerAdvice`.  
+- Building polylines and static map URLs.  
+- Testing external API integrations.
 
 ## Design Patterns
-- **Repository** (Spring Data JPA).
-- **DTO / Mapper** (AbstractMapper + concrete mappers).
-- **Factory** for building static map URLs in `OpenRouteService`.
-- **Strategy** can be considered for multiple report formats.
 
-## Unit Testing Decisions
-- Focus on service layer logic (filtering, computed attributes).
-- Mock external calls (ORS) in service tests.
-- Use `@DataJpaTest` for repository queries.
-- Validate JSON (serialization/deserialization) via Jackson tests.
+- **Repository**: Data access abstraction.  
+- **DTO & Mapper**: Decoupling domain from persistence.  
+- **Factory**: Static map URL construction in `OpenRouteService`.  
+
+## Unit Testing
+
+- **`@DataJpaTest`** for repository-level tests.  
+- **Mocking** external ORS calls with Mockito.  
+- **Jackson** tests for JSON serialization/deserialization.  
 
 ## Unique Feature
-- Dynamic static map generation via OSM static map API with route polyline encoding.
+
+Dynamic static map image generation using OpenStreetMap, encoded polylines, and custom markers.
 
 ## Time Tracking
-- Total estimated effort: 60h  
-  - Architecture & design: 8h  
-  - Core CRUD & search: 12h  
-  - Logging & error handling: 4h  
-  - Import/Export: 6h  
-  - Reporting & PDFs: 8h  
-  - ORS integration & map URLs: 10h  
-  - Unit tests & mocking: 8h  
-  - Documentation & diagrams: 4h  
 
-## Git Repository
-- [GitHub - bsnyr03/MBTourPlanner](https://github.com/bsnyr03/MBTourPlanner)
-- [Github - bsnyr03/MBTourPlannerFrontend](https://github.com/bsnyr03/MBTourPlannerFrontend)
+| Task                                 | Hours |
+|--------------------------------------|-------|
+| Architecture & design                | 8     |
+| Core CRUD & search                   | 12    |
+| Validation & error handling          | 4     |
+| Import/Export (JSON, CSV)            | 6     |
+| Reporting & PDF generation           | 8     |
+| ORS integration & map URLs           | 10    |
+| Unit testing & mocking               | 8     |
+| Documentation & diagrams             | 4     |
+| **Total**                            | **60** |
+
+## Git Repositories
+
+- **Backend**: https://github.com/bsnyr03/MBTourPlanner  
+- **Frontend**: https://github.com/bsnyr03/MBTourPlannerFrontend  
