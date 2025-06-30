@@ -3,6 +3,7 @@ package at.fhtw.mbtourplanner.service;
 import at.fhtw.mbtourplanner.model.Tour;
 import at.fhtw.mbtourplanner.model.TourLog;
 import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFontFactory;
@@ -20,6 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
@@ -49,16 +55,6 @@ public class ReportService {
         Document document = new Document(pdfDocument);
 
         document.setMargins(20, 20, 20, 20);
-
-        if(tour.getRouteImageUrl() != null && !tour.getRouteImageUrl().isEmpty()) {
-            try{
-                Image img = new Image(ImageDataFactory.create(tour.getRouteImageUrl()))
-                        .scaleToFit(500, 300)
-                        .setHorizontalAlignment(HorizontalAlignment.CENTER);
-                document.add(img);
-                document.add(new Paragraph("\n"));
-            }catch (Exception ignore){}
-        }
 
         // Titel
         Paragraph title = new Paragraph("Tour Report: " + tour.getName())
@@ -112,6 +108,29 @@ public class ReportService {
                 .setBorder(Border.NO_BORDER).setPadding(4));
 
         document.add(detailsTable);
+        document.add(new Paragraph("\n"));
+
+        String mapUrl = tour.getRouteImageUrl();
+        try {
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(mapUrl))
+                    .build();
+            HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            if (response.statusCode() == 200) {
+                byte[] imageBytes = response.body();
+                ImageData mapData = ImageDataFactory.create(imageBytes);
+                Image mapImage = new Image(mapData);
+                mapImage.setAutoScale(true);
+                document.add(mapImage);
+            } else {
+                throw new IOException("Non-OK HTTP status: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            log.error("Map image for tour {} could not be loaded", tour.getId(), e);
+            document.add(new Paragraph("Route Map: " + mapUrl));
+        }
+
         document.add(new Paragraph("\n"));
 
         // Tour Logs
