@@ -1,6 +1,13 @@
 @startuml
 
 package controller {
+
+  class GlobalExceptionHandler {
+    @ExceptionHandler(Exception.class)
+    +handleValidationErrors(ex: Exception): ResponseEntity<String>
+    +handleNotFound(ex: NotFoundException): ResponseEntity<String>
+  }
+
   class TourController {
     @RequestMapping("api/tours")
 
@@ -21,9 +28,31 @@ package controller {
     +deleteTourLog(id: Long, tourId: Long): void
   }
 
+  class ReportController {
+    @RequestMapping("api/reports")
+
+    +downloadTourReport(tourId: Long): Report
+    +downloadSummaryReport(): Report
+  }
+
   TourController ..> TourService
   TourLogController ..> TourLogService
 
+ }
+
+ package converter {
+    class DurationToIntervalConverter {
+        +convertToDatabaseColumn(source: String): Duration
+        +convertToEntityAttribute(source: Duration): String
+    }
+
+    class DurationToIntervalDeserializer {
+        +deserialize(value: Duration): Duration
+    }
+
+    class DurationToIntervalSerializer {
+        +serialize(duration: Duration): void
+    }
  }
 
 package model {
@@ -68,7 +97,13 @@ package repository {
     +transportType: String
     +distance: Double
     +estimatedTime: String
-    routeImageUrl: String
+    +routeImageUrl: String
+    fromLatitude: Double
+    fromLongitude: Double
+    toLatitude: Double
+    toLongitude: Double
+    popularity: Integer
+    childFriendliness: Double
 }
 
   class TourLogEntity {
@@ -91,6 +126,27 @@ package service{
     +toEntity(dto: D): E
     +toDto(entities: Collection<E>): List<D>
     }
+
+    class GeocodingService {
+            +getCoordinates(location: String): Coordinates
+            +getAddress(coordinates: Coordinates): String
+        }
+
+        class OpenRouteService {
+            +getRoute(from: Coordinates, to: Coordinates): Route
+            +getDistance(route: Route): Double
+            +getEstimatedTime(route: Route): String
+        }
+
+        class PolyLineEncoder {
+            +encode(route: Route): String
+            +decode(encoded: String): List<Coordinates>
+        }
+
+        class ReportService {
+            +generateTourReport(tour: Tour): Report
+            +generateTourLogReport(tourLog: TourLog): Report
+        }
 
     class TourMapper extends AbstractMapper<TourEntity, Tour> {
         +toDto(entity: TourEntity): Tour
