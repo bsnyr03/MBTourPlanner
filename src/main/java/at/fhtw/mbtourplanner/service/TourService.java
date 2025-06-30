@@ -57,10 +57,16 @@ public class TourService {
         entity.setDistance(rawDistance / 1000.0);
         entity.setEstimatedTime(Duration.ofSeconds(rawDurationSec));
 
-        @SuppressWarnings("unchecked")
-        List<List<Double>> geometry = (List<List<Double>>) routeInfo.get("geometry");
         entity.setRouteImageUrl(
-            openRouteService.getStaticRouteMapUrl(geometry, 600, 400, 14)
+            openRouteService.getStaticRouteMapUrl(
+                List.of(
+                    List.of(entity.getFromLon(), entity.getFromLat()),
+                    List.of(entity.getToLon(),   entity.getToLat())
+                ),
+                600,
+                400,
+                14
+            )
         );
 
         tourRepository.save(entity);
@@ -109,11 +115,17 @@ public class TourService {
         long rawDurationSec = ((Number) routeInfo.get("duration")).longValue();
         existing.setDistance(rawDistance / 1000.0);
         existing.setEstimatedTime(Duration.ofSeconds(rawDurationSec));
-
-        @SuppressWarnings("unchecked")
-        List<List<Double>> geometry = (List<List<Double>>) routeInfo.get("geometry");
+        // Build static map from start/end coordinates
         existing.setRouteImageUrl(
-            openRouteService.getStaticRouteMapUrl(geometry, 600, 400, 14)
+            openRouteService.getStaticRouteMapUrl(
+                List.of(
+                    List.of(existing.getFromLon(), existing.getFromLat()),
+                    List.of(existing.getToLon(),   existing.getToLat())
+                ),
+                600,
+                400,
+                14
+            )
         );
 
         var saved = tourRepository.save(existing);

@@ -8,6 +8,9 @@ import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import at.fhtw.mbtourplanner.service.PolyLineEncoder;
+
 
 @Service
 @Slf4j
@@ -68,13 +71,42 @@ public class OpenRouteService {
         @SuppressWarnings("unchecked")
         Map<String, Object> geometryObj = (Map<String, Object>) feature.get("geometry");
         @SuppressWarnings("unchecked")
-        List<List<Double>> geometry = (List<List<Double>>) geometryObj.get("coordinates");
-        log.info("ORS geometry points: {}", geometry.size());
+        List<List<Double>> geometryCoords = (List<List<Double>>) geometryObj.get("coordinates");
+
+        List<double[]> polyCoords = geometryCoords.stream()
+            .map(pt -> new double[]{pt.get(1), pt.get(0)})
+            .collect(Collectors.toList());
+
+        String polyline = PolyLineEncoder.encode(polyCoords);
+
+        double sumLat = 0, sumLon = 0;
+        for (double[] p : polyCoords) {
+            sumLat += p[0];
+            sumLon += p[1];
+        }
+        double centerLat = sumLat / polyCoords.size();
+        double centerLon = sumLon / polyCoords.size();
+
+        double[] start = polyCoords.get(0);
+        double[] end = polyCoords.get(polyCoords.size() - 1);
+
+        String url = String.format(
+            "https://staticmap.openstreetmap.de/staticmap.php?size=600x400" +
+            "&center=%f,%f&zoom=13" +
+            "&markers=%f,%f,blue1|%f,%f,red1" +
+            "&path=enc:%s",
+            centerLat, centerLon,
+            start[0], start[1],
+            end[0], end[1],
+            polyline
+        );
+
+        log.info("Generated static OSM URL: {}", url);
 
         return Map.of(
-                "distance", distance,
-                "duration", duration,
-                "geometry", geometry
+            "distance", distance,
+            "duration", duration,
+            "staticMapUrl", url
         );
     }
 
