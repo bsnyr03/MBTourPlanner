@@ -1,13 +1,10 @@
 package at.fhtw.mbtourplanner.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -23,15 +20,13 @@ public class GeocodingService {
                         .queryParam("q", address)
                         .build())
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<Map<String,Object>>>(){})
+                .bodyToMono(JsonNode[].class)
                 .block();
-        if (response == null || response.isEmpty()) {
-            throw new RuntimeException("Geocoding failed for " + address);
-        }
-        Map<String,Object> first = response.get(0);
+
+        JsonNode first = response[0];
         return new double[]{
-                Double.parseDouble((String) first.get("lat")),
-                Double.parseDouble((String) first.get("lon"))
+                first.get("lat").asDouble(),
+                first.get("lon").asDouble()
         };
     }
 }
