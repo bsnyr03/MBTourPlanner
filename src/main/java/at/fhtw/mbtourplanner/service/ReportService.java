@@ -15,16 +15,22 @@ import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.element.*;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.constraintvalidators.hv.URLValidator;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -59,14 +65,19 @@ public class ReportService {
 
         document.setMargins(20, 20, 20, 20);
 
+        // Image
         TourEntity entity = tourRepository.findById(tourId)
                 .orElseThrow(() -> new SQLException("Tour not found with ID: " + tourId));
-        byte[] imgData = entity.getRouteImageData();
-        if (imgData != null) {
-            ImageData img = ImageDataFactory.create(imgData);
-            document.add(new Image(img));
-        }
+        byte[] imgData = getStitchedOSMTiles(
+                entity.getFromLat(), entity.getFromLon(),
+                entity.getToLat(), entity.getToLon()
+        );
 
+        ImageData img = ImageDataFactory.create(imgData);
+        document.add(new Image(img)
+                .setHorizontalAlignment(HorizontalAlignment.CENTER)
+                .setWidth(UnitValue.createPercentValue(100))
+                .setHeight(UnitValue.createPercentValue(30)));
         document.add(new Paragraph("\n"));
 
         // Titel
@@ -228,6 +239,58 @@ public class ReportService {
         log.info("Generated summary report PDF ({} bytes)", outputStream.size());
         document.close();
         return outputStream.toByteArray();
+    }
+
+    private BufferedImage downloadTile(int zoom, int x, int y) throws IOException, InterruptedException {
+        String url = String.format("https://tile.openstreetmap.org/%d/%d/%d.png", zoom, x, y);
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("User-Agent", "mbtourplanner/1.0 (barisenyer@gmail.com)")
+                .build();
+        HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to download tile: " + url + " (HTTP " + response.statusCode() + ")");
+        }
+        return ImageIO.read(new java.io.ByteArrayInputStream(response.body()));
+    }
+
+
+    private byte[] getStitchedOSMTiles(double fromLat, double fromLon, double toLat, double toLon) throws IOException, InterruptedException {
+        int zoom = 15;
+
+        int[] fromTile = latLonToTileXY(fromLat, fromLon, zoom);
+        int[] toTile = latLonToTileXY(toLat, toLon, zoom);
+
+        int minX = Math.min(fromTile[0], toTile[0]);
+        int maxX = Math.max(fromTile[0], toTile[0]);
+        int minY = Math.min(fromTile[1], toTile[1]);
+        int maxY = Math.max(fromTile[1], toTile[1]);
+
+        int tileWidth = maxX - minX + 1;
+        int tileHeight = maxY - minY + 1;
+        int tileSize = 256;
+
+        BufferedImage stitched = new BufferedImage(tileWidth * tileSize, tileHeight * tileSize, BufferedImage.TYPE_INT_RGB);
+        Graphics g = stitched.getGraphics();
+
+        for (int x = 0; x < tileWidth; x++) {
+            for (int y = 0; y < tileHeight; y++) {
+                BufferedImage tile = downloadTile(zoom, minX + x, minY + y);
+                g.drawImage(tile, x * tileSize, y * tileSize, null);
+            }
+        }
+        g.dispose();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(stitched, "png", baos);
+        return baos.toByteArray();
+    }
+
+    private int[] latLonToTileXY(double lat, double lon, int zoom) {
+        int x = (int) Math.floor((lon + 180) / 360 * (1 << zoom));
+        int y = (int) Math.floor((1 - Math.log(Math.tan(Math.toRadians(lat)) + 1 / Math.cos(Math.toRadians(lat))) / Math.PI) / 2 * (1 << zoom));
+        return new int[]{x, y};
     }
 
 
