@@ -275,25 +275,30 @@ public class ReportService {
 
     private byte[] getStitchedOSMTiles(double fromLat, double fromLon, double toLat, double toLon, List<double[]> routeCoords) throws IOException, InterruptedException {
         int zoom = 14;
+        int tileSize = 256;
 
-        int[] fromTile = latLonToTileXY(fromLat, fromLon, zoom);
-        int[] toTile = latLonToTileXY(toLat, toLon, zoom);
+        double minLat = Double.MAX_VALUE, maxLat = -Double.MAX_VALUE;
+        double minLon = Double.MAX_VALUE, maxLon = -Double.MAX_VALUE;
+        for (double[] coord : routeCoords) {
+            minLat = Math.min(minLat, coord[0]);
+            maxLat = Math.max(maxLat, coord[0]);
+            minLon = Math.min(minLon, coord[1]);
+            maxLon = Math.max(maxLon, coord[1]);
+        }
 
-        int minX = Math.min(fromTile[0], toTile[0]);
-        int maxX = Math.max(fromTile[0], toTile[0]);
-        int minY = Math.min(fromTile[1], toTile[1]);
-        int maxY = Math.max(fromTile[1], toTile[1]);
+        int[] minTile = latLonToTileXY(minLat, minLon, zoom);
+        int[] maxTile = latLonToTileXY(maxLat, maxLon, zoom);
+
+        int minX = Math.min(minTile[0], maxTile[0]);
+        int maxX = Math.max(minTile[0], maxTile[0]);
+        int minY = Math.min(minTile[1], maxTile[1]);
+        int maxY = Math.max(minTile[1], maxTile[1]);
 
         int tileWidth = maxX - minX + 1;
         int tileHeight = maxY - minY + 1;
-        int tileSize = 256;
 
         BufferedImage stitched = new BufferedImage(tileWidth * tileSize, tileHeight * tileSize, BufferedImage.TYPE_INT_RGB);
         Graphics g = stitched.getGraphics();
-
-        if (routeCoords != null && !routeCoords.isEmpty()) {
-            drawRouteOnImage(stitched, routeCoords, zoom, minX, minY, tileSize);
-        }
 
         for (int x = 0; x < tileWidth; x++) {
             for (int y = 0; y < tileHeight; y++) {
@@ -302,6 +307,10 @@ public class ReportService {
             }
         }
         g.dispose();
+
+        if (routeCoords != null && !routeCoords.isEmpty()) {
+            drawRouteOnImage(stitched, routeCoords, zoom, minX, minY, tileSize);
+        }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(stitched, "png", baos);
