@@ -37,6 +37,7 @@ import java.net.http.HttpResponse;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,10 +47,25 @@ public class ReportService {
     private final TourService tourService;
     private final TourLogService tourLogService;
     private final TourRepository tourRepository;
+    private final OpenRouteService openRouteService;
 
     public byte[] generateTourReportPDF(Long tourId) throws Exception {
         log.info("Starting generation of tour report PDF for tourId={}", tourId);
         Tour tour = tourService.getTourById(tourId);
+
+        var routeInfo = openRouteService.getRouteInfo("foot-walking",
+                List.of(
+                        List.of(tour.getFromLon(), tour.getFromLat()),
+                        List.of(tour.getToLon(), tour.getToLat())
+                ));
+
+        List<List<Double>> coords = (List<List<Double>>) routeInfo.get("route");
+
+        List<double[]> routeCoords = new ArrayList<>();
+
+        for(List<Double> coord : coords) {
+            routeCoords.add(new double[]{coord.get(0), coord.get(1)});
+        }
 
         if(tour == null) {
             throw new SQLException("Tour not found with ID: " + tourId);
@@ -70,7 +86,8 @@ public class ReportService {
                 .orElseThrow(() -> new SQLException("Tour not found with ID: " + tourId));
         byte[] imgData = getStitchedOSMTiles(
                 entity.getFromLat(), entity.getFromLon(),
-                entity.getToLat(), entity.getToLon()
+                entity.getToLat(), entity.getToLon(),
+                routeCoords
         );
 
         ImageData img = ImageDataFactory.create(imgData);
@@ -256,8 +273,8 @@ public class ReportService {
     }
 
 
-    private byte[] getStitchedOSMTiles(double fromLat, double fromLon, double toLat, double toLon) throws IOException, InterruptedException {
-        int zoom = 15;
+    private byte[] getStitchedOSMTiles(double fromLat, double fromLon, double toLat, double toLon, List<double[]> routeCoords) throws IOException, InterruptedException {
+        int zoom = 14;
 
         int[] fromTile = latLonToTileXY(fromLat, fromLon, zoom);
         int[] toTile = latLonToTileXY(toLat, toLon, zoom);
@@ -273,6 +290,10 @@ public class ReportService {
 
         BufferedImage stitched = new BufferedImage(tileWidth * tileSize, tileHeight * tileSize, BufferedImage.TYPE_INT_RGB);
         Graphics g = stitched.getGraphics();
+
+        if (routeCoords != null && !routeCoords.isEmpty()) {
+            drawRouteOnImage(stitched, routeCoords, zoom, minX, minY, tileSize);
+        }
 
         for (int x = 0; x < tileWidth; x++) {
             for (int y = 0; y < tileHeight; y++) {
@@ -291,6 +312,59 @@ public class ReportService {
         int x = (int) Math.floor((lon + 180) / 360 * (1 << zoom));
         int y = (int) Math.floor((1 - Math.log(Math.tan(Math.toRadians(lat)) + 1 / Math.cos(Math.toRadians(lat))) / Math.PI) / 2 * (1 << zoom));
         return new int[]{x, y};
+    }
+
+    private Point latLonToPixel(double lat, double lon, int zoom, int minX, int minY, int tileSize) {
+        double x = (lon + 180) / 360 * (1 << zoom);
+        double y = (1 - Math.log(Math.tan(Math.toRadians(lat)) + 1 / Math.cos(Math.toRadians(lat))) / Math.PI) / 2 * (1 << zoom);
+        int pixelX = (int) Math.round((x - minX) * tileSize);
+        int pixelY = (int) Math.round((y - minY) * tileSize);
+        return new Point(pixelX, pixelY);
+    }
+
+    private void drawRouteOnImage(BufferedImage image, List<double[]> routeCoords, int zoom, int minX, int minY, int tileSize) {
+        Graphics2D g2 = image.createGraphics();
+        g2.setColor(Color.BLUE);
+        g2.setStroke(new BasicStroke(4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        Point prev = null;
+        for (double[] coord : routeCoords) {
+            Point p = latLonToPixel(coord[0], coord[1], zoom, minX, minY, tileSize);
+            if (prev != null) {
+                g2.drawLine(prev.x, prev.y, p.x, p.y);
+            }
+            prev = p;
+        }
+        g2.dispose();
+    }
+
+    private List<double[]> decodePolyline(String polyline) {
+        List<double[]> coords = new java.util.ArrayList<>();
+        int index = 0, len = polyline.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = polyline.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = polyline.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            coords.add(new double[]{lat / 1E5, lng / 1E5});
+        }
+        return coords;
     }
 
 
