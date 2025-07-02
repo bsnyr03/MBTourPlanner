@@ -59,6 +59,16 @@ public class ReportService {
 
         document.setMargins(20, 20, 20, 20);
 
+        TourEntity entity = tourRepository.findById(tourId)
+                .orElseThrow(() -> new SQLException("Tour not found with ID: " + tourId));
+        byte[] imgData = entity.getRouteImageData();
+        if (imgData != null) {
+            ImageData img = ImageDataFactory.create(imgData);
+            document.add(new Image(img));
+        }
+
+        document.add(new Paragraph("\n"));
+
         // Titel
         Paragraph title = new Paragraph("Tour Report: " + tour.getName())
                 .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD))
@@ -111,15 +121,7 @@ public class ReportService {
                 .setBorder(Border.NO_BORDER).setPadding(4));
 
         document.add(detailsTable);
-        document.add(new Paragraph("\n"));
 
-        TourEntity entity = tourRepository.findById(tourId)
-            .orElseThrow(() -> new SQLException("Tour not found with ID: " + tourId));
-        byte[] imgData = entity.getRouteImageData();
-        if (imgData != null) {
-            ImageData img = ImageDataFactory.create(imgData);
-            document.add(new Image(img));
-        }
 
         document.add(new Paragraph("\n"));
 

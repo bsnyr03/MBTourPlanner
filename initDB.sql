@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS tours
     child_friendliness
     DOUBLE PRECISION,
     route_image_data
-    BYTEA
+    BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS tour_logs
