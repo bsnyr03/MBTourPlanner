@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS tours
     popularity
     INTEGER,
     child_friendliness
-    DOUBLE PRECISION,
+    DOUBLE PRECISION
 );
 
 CREATE TABLE IF NOT EXISTS tour_logs
