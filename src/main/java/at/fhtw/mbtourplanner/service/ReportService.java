@@ -53,6 +53,11 @@ public class ReportService {
         log.info("Starting generation of tour report PDF for tourId={}", tourId);
         Tour tour = tourService.getTourById(tourId);
 
+        if(tour == null) {
+            throw new SQLException("Tour not found with ID: " + tourId);
+        }
+
+
         var routeInfo = openRouteService.getRouteInfo("foot-walking",
                 List.of(
                         List.of(tour.getFromLon(), tour.getFromLat()),
@@ -67,9 +72,6 @@ public class ReportService {
             routeCoords.add(new double[]{coord.get(0), coord.get(1)});
         }
 
-        if(tour == null) {
-            throw new SQLException("Tour not found with ID: " + tourId);
-        }
 
         List<TourLog> tourlogs = tourLogService.getLogsForTour(tourId);
         log.debug("Fetched tour: {} with {} logs", tour, tourlogs.size());

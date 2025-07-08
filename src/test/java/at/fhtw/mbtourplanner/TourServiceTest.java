@@ -112,20 +112,14 @@ public class TourServiceTest {
 
     @Test
     void addTour_shouldSaveMappedEntity() throws SQLException {
-        Map<String, Object> summary = Map.of(
+        when(geocodingService.geocode(anyString())).thenReturn(new double[]{0.0, 0.0});
+
+        Map<String, Object> routeInfo = Map.of(
+                "staticMapUrl", "http://static.map",
                 "distance", 1000.0,
                 "duration", 3600.0
         );
-        Map<String, Object> properties = Map.of("summary", summary);
-        Map<String, Object> geometry = Map.of("coordinates", List.of(List.of(0.0, 0.0), List.of(1.0, 1.0)));
-        Map<String, Object> feature = Map.of(
-                "properties", properties,
-                "geometry", geometry
-        );
-        Map<String, Object> routeInfo = Map.of("features", List.of(feature));
-
         when(openRouteService.getRouteInfo(anyString(), anyList())).thenReturn(routeInfo);
-
 
         tourService.addTour(sampleDto);
 
@@ -181,19 +175,12 @@ public class TourServiceTest {
 
         when(geocodingService.geocode(anyString())).thenReturn(new double[]{0.0, 0.0});
 
-        Map<String, Object> summary = Map.of(
+        Map<String, Object> routeInfo = Map.of(
+                "staticMapUrl", "mockedUrl",
                 "distance", 1000.0,
                 "duration", 3600.0
         );
-        Map<String, Object> properties = Map.of("summary", summary);
-        Map<String, Object> geometry = Map.of("coordinates", List.of(List.of(0.0, 0.0), List.of(1.0, 1.0)));
-        Map<String, Object> feature = Map.of(
-                "properties", properties,
-                "geometry", geometry
-        );
-        Map<String, Object> routeInfo = Map.of("features", List.of(feature));
         when(openRouteService.getRouteInfo(anyString(), anyList())).thenReturn(routeInfo);
-        when(openRouteService.getStaticRouteMapUrl(anyList(), anyInt(), anyInt(), anyInt())).thenReturn("mockedUrl");
 
         when(tourRepository.findById(2L)).thenReturn(Optional.of(existingEntity));
         when(tourRepository.save(existingEntity)).thenReturn(existingEntity);
